@@ -25,7 +25,5 @@ impl PeerGroup {
         for peer in peers {
             Peer::terminate(&peer, error_code, &reason);
         }
-
-        peer_group.state.write().terminated = true;
     }
 }

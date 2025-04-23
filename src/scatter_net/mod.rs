@@ -8,4 +8,4 @@ pub use constants::*;
 pub use error_code::ErrorCode;
 pub use net::{NetConfig, NetState, ScatterNet};
 pub use peer::{Peer, PeerState};
-pub use peer_group::{PeerGroup, PeerGroupState};
+pub use peer_group::{PeerGroup, PeerGroupConfig};
