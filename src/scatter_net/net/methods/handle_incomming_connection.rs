@@ -12,6 +12,6 @@ impl ScatterNet {
     ) -> Result<Arc<Peer>> {
         let connection = incoming.accept()?.await?;
 
-        Self::init_peer(&net, connection)
+        Self::init_peer(&net, connection, None)
     }
 }
