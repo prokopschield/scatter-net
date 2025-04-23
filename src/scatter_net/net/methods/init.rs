@@ -40,6 +40,17 @@ impl ScatterNet {
 
         spawn(Self::accept_loop(net.clone()));
 
+        Self::init_peer_groups(&net, net.config.peer_groups.clone())?;
+
+        for peer_state in &net.config.peers {
+            let net = net.clone();
+            let peer_state = peer_state.clone();
+
+            spawn(
+                async move { Self::connect_to(&net, peer_state.node_id, Some(peer_state)).await },
+            );
+        }
+
         Ok(net)
     }
 }
