@@ -1,0 +1,25 @@
+[package]
+name = "scatter-net"
+version = "0.1.0-0"
+description = "Secure data sharing library for peer-to-peer systems"
+license = "GPL-3.0-or-later"
+edition = "2021"
+
+[profile.dev]
+opt-level = 3
+
+[profile.release]
+opt-level = 3
+
+[dependencies]
+anyhow = { version = "1.0.98", features = ["backtrace"] }
+iroh = { version = "0.34.1", features = ["discovery-local-network", "discovery-pkarr-dht"] }
+parking_lot = { version = "0.12.3", features = ["arc_lock"] }
+ps-buffer = "0.1.0-18"
+ps-datalake = { path = "../ps-datalake" }
+ps-hkey = "0.1.0-8"
+ps-str = "0.1.0-2"
+serde = { version = "1.0.219", features = ["serde_derive"] }
+serde_json = "1.0.140"
+tokio = "1.44.2"
+uuid = { version = "1.16.0", features = ["serde", "v7"] }
