@@ -20,7 +20,7 @@ impl Peer {
         state.terminated = false;
 
         let peer = Self {
-            connection,
+            connection: RwLock::new(connection),
             net,
             state: Arc::new(RwLock::new(state)),
         };

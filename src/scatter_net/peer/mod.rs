@@ -10,9 +10,9 @@ pub use types::*;
 
 use super::ScatterNet;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Peer {
-    connection: Connection,
+    connection: RwLock<Connection>,
     net: Arc<ScatterNet>,
     state: Arc<RwLock<PeerState>>,
 }

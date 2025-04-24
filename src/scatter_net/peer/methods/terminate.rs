@@ -8,7 +8,9 @@ impl Peer {
         E: Into<VarInt> + Send,
         R: AsRef<[u8]> + Send,
     {
-        peer.connection.close(error_code.into(), reason.as_ref());
+        peer.connection
+            .read()
+            .close(error_code.into(), reason.as_ref());
 
         let mut state = peer.state.write();
 
