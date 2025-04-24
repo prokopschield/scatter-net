@@ -15,7 +15,7 @@ impl ScatterNet {
         let mut peers_guard = net.peers.write();
 
         if let Some(peer) = peers_guard.get(&node_id) {
-            // TODO peer.replace_connection(connection).await?;
+            peer.replace_connection(connection)?;
 
             return Ok(peer.clone());
         }
