@@ -45,7 +45,7 @@ pub async fn truncate(filename: &str) -> Result<()> {
         .read(true)
         .write(true)
         .create(true)
-        .truncate(true)
+        .truncate(false)
         .open(filename)
         .await?;
 
