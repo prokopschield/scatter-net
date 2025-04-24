@@ -29,7 +29,17 @@ async fn main() -> Result<()> {
         ..Default::default()
     };
 
-    let net = ScatterNet::init(config).await?;
+    let mut state = Vec::new();
+    OpenOptions::new()
+        .read(true)
+        .open(&state_file)
+        .await?
+        .read_to_end(&mut state)
+        .await?;
+
+    let state = serde_json::de::from_slice(&state)?;
+
+    let net = ScatterNet::init(config, state).await?;
 
     eprintln!("Press CTRL+C to exit!");
 
