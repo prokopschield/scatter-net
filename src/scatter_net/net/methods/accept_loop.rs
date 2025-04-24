@@ -1,14 +1,12 @@
 use std::sync::Arc;
 
-use tokio::spawn;
-
-use crate::ScatterNet;
+use crate::{spawn_and_forget, ScatterNet};
 
 impl ScatterNet {
     pub async fn accept_loop(net: Arc<Self>) {
         loop {
             if let Some(incoming) = net.endpoint.accept().await {
-                spawn(Self::handle_incoming_connection(net.clone(), incoming));
+                spawn_and_forget(Self::handle_incoming_connection(net.clone(), incoming));
             }
         }
     }

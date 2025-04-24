@@ -5,7 +5,7 @@ use iroh::Endpoint;
 use ps_datalake::lake::DataLake;
 use tokio::spawn;
 
-use crate::{NetConfig, ScatterNet};
+use crate::{spawn_and_forget, NetConfig, ScatterNet};
 
 impl ScatterNet {
     /// Initializes a [`ScatterNet`] instance.
@@ -46,9 +46,9 @@ impl ScatterNet {
             let net = net.clone();
             let peer_state = peer_state.clone();
 
-            spawn(
-                async move { Self::connect_to(&net, peer_state.node_id, Some(peer_state)).await },
-            );
+            spawn_and_forget(async move {
+                Self::connect_to(&net, peer_state.node_id, Some(peer_state)).await
+            });
         }
 
         Ok(net)
