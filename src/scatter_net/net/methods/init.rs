@@ -5,7 +5,7 @@ use iroh::Endpoint;
 use ps_datalake::lake::DataLake;
 use tokio::spawn;
 
-use crate::{spawn_and_forget, NetConfig, ScatterNet};
+use crate::{spawn_and_forget, NetConfig, ScatterNet, ALPN};
 
 impl ScatterNet {
     /// Initializes a [`ScatterNet`] instance.
@@ -13,6 +13,7 @@ impl ScatterNet {
     /// An Error is returned if binding the socket fails.
     pub async fn init(config: NetConfig) -> Result<Arc<Self>> {
         let mut builder = Endpoint::builder()
+            .alpns(vec![ALPN.to_vec()])
             .discovery_dht()
             .discovery_local_network()
             .discovery_n0();
