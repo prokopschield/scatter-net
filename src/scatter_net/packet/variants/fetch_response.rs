@@ -5,10 +5,10 @@ pub enum FetchResponse {
     /// Requestee couldn't fulfill this request due to an error.
     Error,
 
-    /// Requestee did not have this DataChunk
+    /// Requestee did not have this `DataChunk`
     NotFound,
 
-    /// Successfully retreived encrypted DataChunk.
+    /// Successfully retreived encrypted `DataChunk`.
     Success(Vec<u8>),
 
     /// Suggests a node to talk to.

@@ -9,11 +9,11 @@ impl Interaction {
         peer: Arc<Peer>,
         recv_stream: Option<RecvStream>,
         send_stream: Option<SendStream>,
-    ) -> Interaction {
-        Interaction {
+    ) -> Self {
+        Self {
             peer,
-            recv_stream: recv_stream.map(|stream| Arc::from(stream)),
-            send_stream: send_stream.map(|stream| Arc::from(stream)),
+            recv_stream: recv_stream.map(Arc::from),
+            send_stream: send_stream.map(Arc::from),
         }
     }
 }
