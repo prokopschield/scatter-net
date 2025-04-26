@@ -1,4 +1,3 @@
-use anyhow::Result;
 use bytes::Bytes;
 use ps_buffer::Buffer;
 use ps_deflate::compress_into;
@@ -6,7 +5,7 @@ use ps_deflate::compress_into;
 use crate::Packet;
 
 impl Packet {
-    pub fn to_bytes(&self) -> Result<Bytes> {
+    pub fn to_bytes(&self) -> Result<Bytes, PacketToBytesError> {
         let serialized = bitcode::serialize(self)?;
 
         let ser_len = serialized.len();
@@ -27,4 +26,16 @@ impl Packet {
 
         Ok(bytes)
     }
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum PacketToBytesError {
+    #[error("Buffer allocation failed: {0}")]
+    Buffer(#[from] ps_buffer::BufferError),
+    #[error("Compression failed: {0}")]
+    Compression(#[from] ps_deflate::PsDeflateError),
+    #[error("Integer conversion failed: {0}")]
+    IntConversion(#[from] std::num::TryFromIntError),
+    #[error("bitcode serialization failed: {0}")]
+    Serialization(#[from] bitcode::Error),
 }
