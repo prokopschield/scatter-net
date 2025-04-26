@@ -1,11 +1,12 @@
 use anyhow::Result;
+use bytes::Bytes;
 use ps_buffer::Buffer;
 use ps_deflate::compress_into;
 
 use crate::Packet;
 
 impl Packet {
-    pub fn to_bytes(&self) -> Result<Buffer> {
+    pub fn to_bytes(&self) -> Result<Bytes> {
         let serialized = bitcode::serialize(self)?;
 
         let ser_len = serialized.len();
@@ -22,6 +23,8 @@ impl Packet {
         buffer[0..4].copy_from_slice(&com_len.to_le_bytes());
         buffer[4..8].copy_from_slice(&ser_len.to_le_bytes());
 
-        Ok(buffer)
+        let bytes = Bytes::from_owner(buffer);
+
+        Ok(bytes)
     }
 }
