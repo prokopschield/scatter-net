@@ -1,6 +1,8 @@
 mod implementations;
 mod methods;
 
+pub use methods::*;
+
 use std::{collections::VecDeque, sync::Arc};
 
 use iroh::endpoint::{RecvStream, SendStream};

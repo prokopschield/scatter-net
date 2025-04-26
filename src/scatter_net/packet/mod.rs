@@ -1,6 +1,8 @@
 mod methods;
 mod variants;
 
+pub use methods::*;
+
 use serde::{Deserialize, Serialize};
 use variants::{FetchRequest, FetchResponse, PutRequest, PutResponse};
 

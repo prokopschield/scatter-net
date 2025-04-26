@@ -10,9 +10,9 @@ mod utils;
 
 pub use constants::*;
 pub use error_code::ErrorCode;
-pub use interaction::Interaction;
+pub use interaction::*;
 pub use net::{NetConfig, NetState, ScatterNet};
-pub use packet::Packet;
+pub use packet::*;
 pub use peer::{Peer, PeerState};
 pub use peer_group::{PeerGroup, PeerGroupConfig};
 pub use protocol::ScatterNetProtocol;
