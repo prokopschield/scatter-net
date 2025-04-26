@@ -5,10 +5,7 @@ use ps_deflate::compress_into;
 use crate::Packet;
 
 impl Packet {
-    pub fn to_bytes<B>(&self) -> Result<Buffer>
-    where
-        B: AsRef<[u8]>,
-    {
+    pub fn to_bytes(&self) -> Result<Buffer> {
         let serialized = bitcode::serialize(self)?;
 
         let ser_len = serialized.len();
