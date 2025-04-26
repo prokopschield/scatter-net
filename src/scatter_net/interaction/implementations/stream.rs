@@ -13,7 +13,13 @@ impl Stream for Interaction {
         let packet = self.packets.lock().pop_front();
 
         packet.map_or_else(
-            || std::task::Poll::Pending,
+            || {
+                if *self.closed.read() {
+                    std::task::Poll::Ready(None)
+                } else {
+                    std::task::Poll::Pending
+                }
+            },
             |packet| std::task::Poll::Ready(Some(Ok(packet))),
         )
     }
