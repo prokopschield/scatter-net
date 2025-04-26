@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::Peer;
+use crate::{spawn_and_forget, Interaction, Peer};
 
 impl Peer {
     pub async fn listen_bi(peer: Arc<Self>) -> Result<()> {
@@ -11,7 +11,12 @@ impl Peer {
         loop {
             let channel = connection.accept_bi().await?;
 
-            let _todo = channel;
+            let interaction = Interaction::init(peer.clone(), channel.1, Some(channel.0));
+
+            spawn_and_forget(async move {
+                interaction.process().await?;
+                Ok(())
+            });
         }
     }
 }

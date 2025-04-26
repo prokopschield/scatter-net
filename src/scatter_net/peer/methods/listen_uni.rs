@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::Peer;
+use crate::{spawn_and_forget, Interaction, Peer};
 
 impl Peer {
     pub async fn listen_uni(peer: Arc<Self>) -> Result<()> {
@@ -11,7 +11,12 @@ impl Peer {
         loop {
             let stream = connection.accept_uni().await?;
 
-            let _todo = stream;
+            let interaction = Interaction::init(peer.clone(), stream, None);
+
+            spawn_and_forget(async move {
+                interaction.process().await?;
+                Ok(())
+            });
         }
     }
 }
