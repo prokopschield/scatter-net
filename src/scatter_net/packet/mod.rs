@@ -1,3 +1,4 @@
+mod methods;
 mod variants;
 
 use serde::{Deserialize, Serialize};
