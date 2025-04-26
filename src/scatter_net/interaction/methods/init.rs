@@ -8,14 +8,15 @@ use crate::{Interaction, Peer};
 impl Interaction {
     pub fn init(
         peer: Arc<Peer>,
-        recv_stream: Option<RecvStream>,
+        recv_stream: RecvStream,
         send_stream: Option<SendStream>,
     ) -> Arc<Self> {
         let interaction = Self {
             peer,
-            recv_stream: recv_stream.map(Mutex::new).map(Arc::new),
+            recv_stream: Arc::new(Mutex::new(recv_stream)),
             send_stream: send_stream.map(Mutex::new).map(Arc::new),
             packets: Arc::default(),
+            closed: Arc::default(),
         };
 
         let interaction = Arc::new(interaction);
