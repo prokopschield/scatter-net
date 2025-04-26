@@ -1,10 +1,9 @@
-use anyhow::Result;
 use n0_future::Stream;
 
 use crate::{Interaction, Packet};
 
 impl Stream for Interaction {
-    type Item = Result<Packet>;
+    type Item = Packet;
 
     fn poll_next(
         self: std::pin::Pin<&mut Self>,
@@ -20,7 +19,7 @@ impl Stream for Interaction {
                     std::task::Poll::Pending
                 }
             },
-            |packet| std::task::Poll::Ready(Some(Ok(packet))),
+            |packet| std::task::Poll::Ready(Some(packet)),
         )
     }
 }
