@@ -6,11 +6,7 @@ use tokio::sync::Mutex;
 use crate::{Interaction, Peer};
 
 impl Interaction {
-    pub fn init(
-        peer: Arc<Peer>,
-        recv_stream: RecvStream,
-        send_stream: Option<SendStream>,
-    ) -> Arc<Self> {
+    pub fn init(peer: Arc<Peer>, recv_stream: RecvStream, send_stream: Option<SendStream>) -> Self {
         let interaction = Self {
             peer,
             recv_stream: Arc::new(Mutex::new(recv_stream)),
@@ -19,9 +15,11 @@ impl Interaction {
             closed: Arc::default(),
         };
 
-        let interaction = Arc::new(interaction);
-
-        crate::spawn_and_forget(Self::listen(interaction.clone()));
+        crate::spawn_and_forget(Self::listen(
+            interaction.recv_stream.clone(),
+            interaction.packets.clone(),
+            interaction.closed.clone(),
+        ));
 
         interaction
     }
