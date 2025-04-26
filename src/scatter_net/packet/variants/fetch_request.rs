@@ -1,6 +1,6 @@
-use rkyv::{Archive, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
-#[derive(Archive, Serialize, Deserialize, Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FetchRequest {
     /// Hash of the requested encrypted blob
     hash: String,

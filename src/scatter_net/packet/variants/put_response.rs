@@ -1,6 +1,6 @@
-use rkyv::{Archive, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
-#[derive(Archive, Serialize, Deserialize, Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PutResponse {
     /// Blob has successfully been stored.
     Success(String),
