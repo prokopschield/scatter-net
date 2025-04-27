@@ -2,6 +2,8 @@ mod implementations;
 mod methods;
 mod types;
 
+pub use methods::*;
+
 use std::sync::Arc;
 
 use iroh::endpoint::Connection;
