@@ -1,5 +1,6 @@
 mod accept_loop;
 mod connect_to;
+mod fetch_blob;
 mod get_state;
 mod handle_incomming_connection;
 mod init;
