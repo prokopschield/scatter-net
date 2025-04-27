@@ -8,5 +8,6 @@ pub struct PeerState {
     pub node_id: NodeId,
     #[serde(default)]
     pub terminated: bool,
+    #[serde(default)]
     pub usage: PeerUsage,
 }
