@@ -13,7 +13,7 @@ pub use error_code::ErrorCode;
 pub use interaction::*;
 pub use net::{NetConfig, NetState, ScatterNet};
 pub use packet::*;
-pub use peer::{Peer, PeerState};
+pub use peer::*;
 pub use peer_group::{PeerGroup, PeerGroupConfig};
 pub use protocol::ScatterNetProtocol;
 pub use utils::*;

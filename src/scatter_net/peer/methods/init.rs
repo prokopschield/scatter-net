@@ -4,7 +4,7 @@ use anyhow::Result;
 use iroh::endpoint::Connection;
 use parking_lot::RwLock;
 
-use crate::{scatter_net::peer::PeerState, Peer, ScatterNet};
+use crate::{scatter_net::peer::PeerState, Peer, PeerUsage, ScatterNet};
 
 impl Peer {
     pub fn init(
@@ -15,6 +15,7 @@ impl Peer {
         let mut state = state.unwrap_or(PeerState {
             node_id: connection.remote_node_id()?,
             terminated: false,
+            usage: PeerUsage::default(),
         });
 
         state.terminated = false;
