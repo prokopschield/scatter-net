@@ -1,6 +1,6 @@
 use iroh::protocol::ProtocolHandler;
 
-use crate::{ScatterNet, ScatterNetProtocol};
+use crate::{ScatterNet, ScatterNetProtocol, Terminate};
 
 impl ProtocolHandler for ScatterNetProtocol {
     fn accept(
@@ -13,7 +13,7 @@ impl ProtocolHandler for ScatterNetProtocol {
     }
 
     fn shutdown(&self) -> n0_future::future::Boxed<()> {
-        ScatterNet::terminate(&self.net, 0u8, &"ScatterNetProtocol is exiting.");
+        self.net.terminate(0u8, &"ScatterNetProtocol is exiting.");
 
         Box::pin(async {})
     }

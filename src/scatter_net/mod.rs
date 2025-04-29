@@ -6,6 +6,7 @@ mod packet;
 mod peer;
 mod peer_group;
 mod protocol;
+mod terminate;
 mod utils;
 
 pub use constants::*;
@@ -16,4 +17,5 @@ pub use packet::*;
 pub use peer::*;
 pub use peer_group::{PeerGroup, PeerGroupConfig};
 pub use protocol::ScatterNetProtocol;
+pub use terminate::*;
 pub use utils::*;

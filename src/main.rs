@@ -4,7 +4,7 @@ use std::io::SeekFrom;
 
 use anyhow::Result;
 use ps_datalake::lake::config::{ConfigStoreEntry, DataLakeConfig};
-use scatter_net::{NetConfig, ScatterNet};
+use scatter_net::{NetConfig, ScatterNet, Terminate};
 use tokio::{
     fs::OpenOptions,
     io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt},
@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
 
     eprintln!("\nExiting...");
 
-    ScatterNet::terminate(&net, 0u8, &"SIGINT");
+    net.terminate(0u8, &"SIGINT");
 
     eprintln!("Terminated successfully.");
 

@@ -2,24 +2,24 @@ use std::sync::Arc;
 
 use iroh::endpoint::VarInt;
 
-use crate::{Peer, PeerGroup, ScatterNet};
+use crate::{Peer, PeerGroup, ScatterNet, Terminate};
 
-impl ScatterNet {
-    pub fn terminate<E, R>(net: &Self, error_code: E, reason: &R)
-    where
-        E: Into<VarInt> + Send,
-        R: AsRef<[u8]> + Send,
-    {
+impl<E, R> Terminate<E, R> for ScatterNet
+where
+    E: Into<VarInt> + Send,
+    R: AsRef<[u8]> + Send,
+{
+    fn terminate(&self, error_code: E, reason: &R) {
         let error_code = error_code.into();
         let reason = reason.as_ref();
 
-        let peer_groups = net.peer_groups.read().clone();
+        let peer_groups = self.peer_groups.read().clone();
 
         for peer_group in peer_groups {
             PeerGroup::terminate(&peer_group, error_code, &reason);
         }
 
-        let peers: Vec<Arc<Peer>> = net
+        let peers: Vec<Arc<Peer>> = self
             .peers
             .read()
             .iter()

@@ -2,20 +2,19 @@ use std::sync::Arc;
 
 use iroh::endpoint::VarInt;
 
-use crate::{Peer, PeerGroup};
+use crate::{Peer, PeerGroup, Terminate};
 
-impl PeerGroup {
-    pub fn terminate<E, R>(peer_group: &Self, error_code: E, reason: &R)
-    where
-        E: Into<VarInt> + Send,
-        R: AsRef<[u8]> + Send,
-    {
+impl<E, R> Terminate<E, R> for PeerGroup
+where
+    E: Into<VarInt> + Send,
+    R: AsRef<[u8]> + Send,
+{
+    fn terminate(&self, error_code: E, reason: &R) {
         let error_code = error_code.into();
         let reason = reason.as_ref();
 
         let peers: Vec<Arc<Peer>> = {
-            peer_group
-                .peers
+            self.peers
                 .read()
                 .iter()
                 .map(|(_, peer)| peer.clone())
@@ -23,7 +22,7 @@ impl PeerGroup {
         };
 
         for peer in peers {
-            Peer::terminate(&peer, error_code, &reason);
+            peer.terminate(error_code, &reason);
         }
     }
 }
