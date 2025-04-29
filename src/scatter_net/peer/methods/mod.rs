@@ -7,6 +7,7 @@ mod listen;
 mod listen_bi;
 mod listen_dg;
 mod listen_uni;
+mod net;
 mod node_id;
 mod replace_connection;
 mod send_datagram;
