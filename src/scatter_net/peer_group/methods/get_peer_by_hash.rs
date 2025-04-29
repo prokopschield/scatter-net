@@ -5,6 +5,7 @@ use ps_hkey::Hash;
 use crate::{distance, Peer, PeerGroup};
 
 impl PeerGroup {
+    #[must_use]
     pub fn get_peer_by_hash(&self, hash: &Hash) -> Option<Arc<Peer>> {
         let mut sel_distance = u64::MAX;
         let mut selected = None;
