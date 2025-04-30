@@ -8,7 +8,7 @@ impl Packet {
             Self::Empty | Self::Pong => Ok(None),
             Self::Ping => Ok(Some(Self::Pong)),
             Self::FetchRequest(_request) => todo!(),
-            Self::FetchResponse(_response) => todo!(),
+            Self::FetchResponse(response) => response.process(peer).await,
             Self::PutRequest(_request) => todo!(),
             Self::PutResponse(_response) => todo!(),
         }
@@ -16,4 +16,9 @@ impl Packet {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum PacketProcessError {}
+pub enum PacketProcessError {
+    #[error(transparent)]
+    Put(anyhow::Error),
+    #[error(transparent)]
+    Unknown(#[from] anyhow::Error),
+}
