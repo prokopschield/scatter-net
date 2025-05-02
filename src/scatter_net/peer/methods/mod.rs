@@ -10,6 +10,7 @@ mod listen_dg;
 mod listen_uni;
 mod net;
 mod node_id;
+mod put_blob;
 mod replace_connection;
 mod send_datagram;
 

@@ -11,6 +11,9 @@ pub enum Packet {
     #[default]
     Empty,
 
+    /// This is a general, unspecified error.
+    Error,
+
     Ping,
     Pong,
 
