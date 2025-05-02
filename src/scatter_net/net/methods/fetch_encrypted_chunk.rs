@@ -27,10 +27,11 @@ impl ScatterNet {
     }
 }
 
-type SerializedDataChunkFuture = Pin<Box<dyn Future<Output = Option<SerializedDataChunk>>>>;
+type SerializedDataChunkFuture = dyn Future<Output = Option<SerializedDataChunk>> + Send + Sync;
+type BoxedSerializedDataChunkFuture = Pin<Box<SerializedDataChunkFuture>>;
 
 pub struct ScatterNetFetchEncryptedChunk<'lt> {
-    futures: RwLock<Vec<SerializedDataChunkFuture>>,
+    futures: RwLock<Vec<BoxedSerializedDataChunkFuture>>,
     net: &'lt ScatterNet,
     hash: Arc<Hash>,
     peer_groups: VecDeque<Arc<PeerGroup>>,
