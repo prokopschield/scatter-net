@@ -8,3 +8,6 @@ mod init;
 mod init_peer;
 mod init_peer_groups;
 mod put_blob;
+
+pub use fetch_blob::ScatterNetFetchBlobError;
+pub use fetch_encrypted_chunk::ScatterNetFetchEncryptedChunkError;

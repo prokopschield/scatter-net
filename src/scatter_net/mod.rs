@@ -12,7 +12,7 @@ mod utils;
 pub use constants::*;
 pub use error_code::ErrorCode;
 pub use interaction::*;
-pub use net::{NetConfig, NetState, ScatterNet};
+pub use net::*;
 pub use packet::*;
 pub use peer::*;
 pub use peer_group::{PeerGroup, PeerGroupConfig};

@@ -5,6 +5,7 @@ mod types;
 use std::{collections::HashMap, sync::Arc};
 
 use iroh::{Endpoint, NodeId};
+pub use methods::*;
 use parking_lot::RwLock;
 use ps_datalake::lake::DataLake;
 pub use types::*;
