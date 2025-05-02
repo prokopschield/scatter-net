@@ -16,11 +16,13 @@ impl ScatterNet {
             async move { Ok(net_clone.fetch_encrypted_chunk(hash_arc).await?) }
         };
 
-        let resolved = hkey
+        let buffer = hkey
             .resolve_async::<SerializedDataChunk, ScatterNetFetchBlobError, _, _>(&resolver)
-            .await?;
+            .await?
+            .data_ref()
+            .to_shared_buffer()?;
 
-        Ok(resolved.data_ref().to_shared_buffer()?)
+        Ok(buffer)
     }
 }
 
