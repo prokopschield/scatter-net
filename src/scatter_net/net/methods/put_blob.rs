@@ -3,6 +3,7 @@ use std::{future::Future, pin::Pin, sync::Arc};
 use bytes::Bytes;
 use parking_lot::RwLock;
 use ps_cypher::extract_encrypted;
+use ps_datachunk::BorrowedDataChunk;
 use ps_hash::Hash;
 use ps_hkey::{Hkey, LongHkeyExpanded};
 
@@ -16,9 +17,7 @@ impl ScatterNet {
             return Ok(from_cache.clone());
         }
 
-        let hkey = self.lake.put_blob(&blob).ok();
-
-        let future = ScatterNetPutBlob::new(blob, hash.clone(), hkey, self.clone());
+        let future = ScatterNetPutBlob::new(blob, hash.clone(), self.clone())?;
 
         self.put_cache.write().insert(hash, future.clone());
 
@@ -84,38 +83,38 @@ impl ScatterNetPutBlob {
     }
 
     #[inline]
-    pub fn new(blob: Bytes, hash: Arc<Hash>, hkey: Option<Hkey>, net: Arc<ScatterNet>) -> Self {
+    pub fn new(blob: Bytes, hash: Arc<Hash>, net: Arc<ScatterNet>) -> Result {
         // chunk + deflate + poly1305 + RS(255,231)
         // 4096 B + 5 B + 16 B + 496 B = 4613 B
         if blob.len() > 4613 {
-            return Self::new_split(blob, hash, hkey, net);
+            return Self::new_split(blob, hash, net);
         }
 
         let codeword = match extract_encrypted(&blob) {
-            Err(_) => return Self::new_split(blob, hash, hkey, net),
+            Err(_) => return Self::new_split(blob, hash, net),
             Ok(codeword) => codeword,
         };
 
         if *codeword.codeword == *blob {
-            return Self::new_put(blob, hash, hkey, net);
+            return Self::new_put(blob, hash, net);
         };
 
         // store corrected; try_into_buffer() is infallible here
         if let Ok(buffer) = codeword.codeword.try_into_buffer() {
-            Self::new_put(
-                Bytes::from_owner(buffer),
-                hash.clone(),
-                hkey.clone(),
-                net.clone(),
-            )
-            .background();
+            Self::new_put(Bytes::from_owner(buffer), hash.clone(), net.clone())?.background();
         };
 
         // store actual blob with which put was called
-        Self::new_split(blob, hash, hkey, net)
+        Self::new_split(blob, hash, net)
     }
 
-    pub fn new_put(blob: Bytes, hash: Arc<Hash>, hkey: Option<Hkey>, net: Arc<ScatterNet>) -> Self {
+    pub fn new_put(blob: Bytes, hash: Arc<Hash>, net: Arc<ScatterNet>) -> Result {
+        let chunk = BorrowedDataChunk::from_parts(&blob, hash.clone());
+        let hkey = net
+            .lake
+            .put_encrypted_chunk(&chunk)
+            .unwrap_or(hash.clone().into());
+
         let puts: Vec<Put> = net
             .peer_groups
             .read()
@@ -130,22 +129,19 @@ impl ScatterNetPutBlob {
         let inner = ScatterNetPutBlobInner {
             blob: RwLock::new(Some(blob)),
             hash,
-            hkey: RwLock::new(hkey),
+            hkey: RwLock::new(Some(hkey)),
             net,
             state: RwLock::new(State::Puts(puts)),
         };
 
-        Self {
+        Ok(Self {
             inner: Arc::new(inner),
-        }
+        })
     }
 
-    pub fn new_split(
-        blob: Bytes,
-        hash: Arc<Hash>,
-        hkey: Option<Hkey>,
-        net: Arc<ScatterNet>,
-    ) -> Self {
+    pub fn new_split(blob: Bytes, hash: Arc<Hash>, net: Arc<ScatterNet>) -> Result {
+        let hkey = net.lake.put_blob(&blob).ok();
+
         let net_clone = net.clone();
 
         let future = async move {
@@ -168,9 +164,9 @@ impl ScatterNetPutBlob {
             state: RwLock::new(State::Split(Box::pin(future))),
         };
 
-        Self {
+        Ok(Self {
             inner: Arc::new(inner),
-        }
+        })
     }
 }
 
