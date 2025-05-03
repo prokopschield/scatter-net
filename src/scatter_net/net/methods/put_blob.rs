@@ -5,7 +5,7 @@ use bytes::Bytes;
 use parking_lot::RwLock;
 use ps_cypher::extract_encrypted;
 use ps_hash::Hash;
-use ps_hkey::Hkey;
+use ps_hkey::{Hkey, LongHkeyExpanded};
 
 use crate::{Peer, PeerGroup, PeerPutBlob, ScatterNet};
 
@@ -32,7 +32,6 @@ impl ScatterNet {
     }
 }
 
-#[derive(Debug)]
 pub struct ScatterNetPutBlobInner {
     pub blob: RwLock<Option<Bytes>>,
     pub hash: Hash,
@@ -41,7 +40,6 @@ pub struct ScatterNetPutBlobInner {
     pub state: RwLock<State>,
 }
 
-#[derive(Debug)]
 pub struct Part {
     pub future: Pin<Box<ScatterNetPutBlob>>,
 }
@@ -53,13 +51,15 @@ pub struct Put {
     pub peer_group: Arc<PeerGroup>,
 }
 
-#[derive(Debug)]
+pub type LongHkeyResult = Result<LongHkeyExpanded, ScatterNetPutBlobError>;
+pub type LongHkeyFuture = dyn Future<Output = LongHkeyResult> + Send + Sync;
+
 pub enum State {
-    Parts(Vec<Part>),
     Puts(Vec<Put>),
+    Split(Pin<Box<LongHkeyFuture>>),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct ScatterNetPutBlob {
     inner: Arc<ScatterNetPutBlobInner>,
 }
@@ -139,8 +139,31 @@ impl ScatterNetPutBlob {
     }
 
     pub fn new_split(blob: Bytes, hash: Hash, hkey: Option<Hkey>, net: Arc<ScatterNet>) -> Self {
-        let _ = (blob, hash, hkey, net);
-        todo!()
+        let net_clone = net.clone();
+
+        let future = async move {
+            LongHkeyExpanded::from_blob_async(
+                &|data: &[u8]| {
+                    let net = net_clone.clone();
+                    let bytes = Bytes::copy_from_slice(data);
+                    async move { net.put_blob(bytes)?.await }
+                },
+                &blob,
+            )
+            .await
+        };
+
+        let inner = ScatterNetPutBlobInner {
+            blob: RwLock::new(None),
+            hash,
+            hkey: RwLock::new(hkey),
+            net,
+            state: RwLock::new(State::Split(Box::pin(future))),
+        };
+
+        Self {
+            inner: Arc::new(inner),
+        }
     }
 }
 
@@ -160,4 +183,6 @@ impl Future for ScatterNetPutBlob {
 pub enum ScatterNetPutBlobError {
     #[error(transparent)]
     Hash(#[from] ps_hash::HashError),
+    #[error(transparent)]
+    Hkey(#[from] ps_hkey::PsHkeyError),
 }
