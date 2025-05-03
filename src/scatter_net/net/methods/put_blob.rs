@@ -10,20 +10,20 @@ use crate::{Peer, PeerGroup, PeerPutBlob, ScatterNet};
 
 impl ScatterNet {
     pub fn put_blob(
-        net: &Arc<Self>,
+        self: &Arc<Self>,
         blob: Bytes,
     ) -> Result<ScatterNetPutBlob, ScatterNetPutBlobError> {
         let hash = Hash::hash(&blob)?;
 
-        if let Some(from_cache) = net.put_cache.read().get(&hash) {
+        if let Some(from_cache) = self.put_cache.read().get(&hash) {
             return Ok(from_cache.clone());
         }
 
-        let hkey = net.lake.put_blob(&blob).ok();
+        let hkey = self.lake.put_blob(&blob).ok();
 
-        let future = ScatterNetPutBlob::new(blob, hash, hkey, net.clone());
+        let future = ScatterNetPutBlob::new(blob, hash, hkey, self.clone());
 
-        net.put_cache.write().insert(hash, future.clone());
+        self.put_cache.write().insert(hash, future.clone());
 
         future.background();
 

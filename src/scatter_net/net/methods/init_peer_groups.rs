@@ -5,7 +5,7 @@ use anyhow::Result;
 use crate::{PeerGroup, PeerGroupConfig, ScatterNet};
 
 impl ScatterNet {
-    pub fn init_peer_groups(net: &Arc<Self>, mut configs: Vec<PeerGroupConfig>) -> Result<()> {
+    pub fn init_peer_groups(self: &Arc<Self>, mut configs: Vec<PeerGroupConfig>) -> Result<()> {
         if !configs.iter().any(|peer_group| peer_group.open) {
             configs.extend_from_slice(&[
                 PeerGroupConfig {
@@ -55,10 +55,10 @@ impl ScatterNet {
 
         let peer_groups: Result<Vec<Arc<PeerGroup>>> = configs
             .into_iter()
-            .map(|config| PeerGroup::init(net.clone(), config))
+            .map(|config| PeerGroup::init(self.clone(), config))
             .collect();
 
-        let mut guard = net.peer_groups.write();
+        let mut guard = self.peer_groups.write();
 
         for peer_group in peer_groups? {
             guard.push(peer_group);

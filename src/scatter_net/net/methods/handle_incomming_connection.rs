@@ -7,11 +7,11 @@ use crate::{Peer, ScatterNet};
 
 impl ScatterNet {
     pub async fn handle_incoming_connection(
-        net: Arc<Self>,
+        self: Arc<Self>,
         incoming: Incoming,
     ) -> Result<Arc<Peer>> {
         let connection = incoming.accept()?.await?;
 
-        Self::init_peer(&net, connection, None)
+        Self::init_peer(&self, connection, None)
     }
 }

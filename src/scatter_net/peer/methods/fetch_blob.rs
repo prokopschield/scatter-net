@@ -7,12 +7,12 @@ use crate::{FetchRequest, FetchResponse, Packet, Peer};
 
 impl Peer {
     pub async fn fetch_blob(
-        peer: Arc<Self>,
+        self: Arc<Self>,
         hkey: Hkey,
         level: u8,
         recursive: bool,
     ) -> Result<Option<FetchResponse>, PeerFetchBlobError> {
-        let mut interaction = Self::begin_interaction(peer.clone()).await?;
+        let mut interaction = Self::begin_interaction(self.clone()).await?;
 
         let request = FetchRequest {
             hash: hkey.to_string(),
@@ -29,7 +29,7 @@ impl Peer {
                 return Ok(Some(response));
             }
 
-            response.process(peer.clone()).await?;
+            response.process(self.clone()).await?;
         }
 
         Ok(None)

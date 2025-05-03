@@ -7,12 +7,12 @@ use crate::{Peer, PeerState, ScatterNet};
 
 impl ScatterNet {
     pub fn init_peer(
-        net: &Arc<Self>,
+        self: &Arc<Self>,
         connection: Connection,
         state: Option<PeerState>,
     ) -> Result<Arc<Peer>> {
         let node_id = connection.remote_node_id()?;
-        let mut peers_guard = net.peers.write();
+        let mut peers_guard = self.peers.write();
 
         if let Some(peer) = peers_guard.get(&node_id) {
             peer.replace_connection(connection)?;
@@ -20,7 +20,7 @@ impl ScatterNet {
             return Ok(peer.clone());
         }
 
-        let peer = Peer::init(net.clone(), connection, state)?;
+        let peer = Peer::init(self.clone(), connection, state)?;
 
         peers_guard.insert(node_id, peer.clone());
 

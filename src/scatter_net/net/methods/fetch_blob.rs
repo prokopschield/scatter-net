@@ -8,9 +8,9 @@ use ps_hkey::{Hash, Hkey, PsHkeyError};
 use crate::ScatterNet;
 
 impl ScatterNet {
-    pub async fn fetch_blob(net: Arc<Self>, hkey: &Hkey) -> Result<SharedBuffer> {
+    pub async fn fetch_blob(self: Arc<Self>, hkey: &Hkey) -> Result<SharedBuffer> {
         let resolver = move |hash: &Hash| {
-            let net_clone = net.clone();
+            let net_clone = self.clone();
             let hash_arc = Arc::new(*hash);
 
             async move { Ok(net_clone.fetch_encrypted_chunk(hash_arc).await?) }
