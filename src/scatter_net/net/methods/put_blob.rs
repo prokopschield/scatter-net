@@ -10,7 +10,7 @@ use crate::{Peer, PeerGroup, PeerPutBlob, ScatterNet};
 
 impl ScatterNet {
     pub fn put_blob(self: &Arc<Self>, blob: Bytes) -> Result {
-        let hash = Hash::hash(&blob)?;
+        let hash = Arc::new(Hash::hash(&blob)?);
 
         if let Some(from_cache) = self.put_cache.read().get(&hash) {
             return Ok(from_cache.clone());
@@ -18,7 +18,7 @@ impl ScatterNet {
 
         let hkey = self.lake.put_blob(&blob).ok();
 
-        let future = ScatterNetPutBlob::new(blob, hash, hkey, self.clone());
+        let future = ScatterNetPutBlob::new(blob, hash.clone(), hkey, self.clone());
 
         self.put_cache.write().insert(hash, future.clone());
 
@@ -30,7 +30,7 @@ impl ScatterNet {
 
 pub struct ScatterNetPutBlobInner {
     pub blob: RwLock<Option<Bytes>>,
-    pub hash: Hash,
+    pub hash: Arc<Hash>,
     pub hkey: RwLock<Option<Hkey>>,
     pub net: Arc<ScatterNet>,
     pub state: RwLock<State>,
@@ -84,7 +84,7 @@ impl ScatterNetPutBlob {
     }
 
     #[inline]
-    pub fn new(blob: Bytes, hash: Hash, hkey: Option<Hkey>, net: Arc<ScatterNet>) -> Self {
+    pub fn new(blob: Bytes, hash: Arc<Hash>, hkey: Option<Hkey>, net: Arc<ScatterNet>) -> Self {
         // chunk + deflate + poly1305 + RS(255,231)
         // 4096 B + 5 B + 16 B + 496 B = 4613 B
         if blob.len() > 4613 {
@@ -102,14 +102,20 @@ impl ScatterNetPutBlob {
 
         // store corrected; try_into_buffer() is infallible here
         if let Ok(buffer) = codeword.codeword.try_into_buffer() {
-            Self::new_put(Bytes::from_owner(buffer), hash, hkey.clone(), net.clone()).background();
+            Self::new_put(
+                Bytes::from_owner(buffer),
+                hash.clone(),
+                hkey.clone(),
+                net.clone(),
+            )
+            .background();
         };
 
         // store actual blob with which put was called
         Self::new_split(blob, hash, hkey, net)
     }
 
-    pub fn new_put(blob: Bytes, hash: Hash, hkey: Option<Hkey>, net: Arc<ScatterNet>) -> Self {
+    pub fn new_put(blob: Bytes, hash: Arc<Hash>, hkey: Option<Hkey>, net: Arc<ScatterNet>) -> Self {
         let puts: Vec<Put> = net
             .peer_groups
             .read()
@@ -134,7 +140,12 @@ impl ScatterNetPutBlob {
         }
     }
 
-    pub fn new_split(blob: Bytes, hash: Hash, hkey: Option<Hkey>, net: Arc<ScatterNet>) -> Self {
+    pub fn new_split(
+        blob: Bytes,
+        hash: Arc<Hash>,
+        hkey: Option<Hkey>,
+        net: Arc<ScatterNet>,
+    ) -> Self {
         let net_clone = net.clone();
 
         let future = async move {

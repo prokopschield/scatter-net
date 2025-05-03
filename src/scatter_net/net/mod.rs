@@ -21,6 +21,6 @@ pub struct ScatterNet {
     node_id: NodeId,
     peers: Arc<RwLock<HashMap<NodeId, Arc<Peer>>>>,
     peer_groups: Arc<RwLock<Vec<Arc<PeerGroup>>>>,
-    put_cache: Arc<RwLock<HashMap<Hash, ScatterNetPutBlob>>>,
+    put_cache: Arc<RwLock<HashMap<Arc<Hash>, ScatterNetPutBlob>>>,
     state: Arc<RwLock<NetState>>,
 }
