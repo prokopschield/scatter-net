@@ -6,7 +6,7 @@ use parking_lot::RwLock;
 use ps_hash::Hash;
 use ps_hkey::Hkey;
 
-use crate::{Peer, PeerPutBlob, ScatterNet};
+use crate::{Peer, PeerGroup, PeerPutBlob, ScatterNet};
 
 impl ScatterNet {
     pub fn put_blob(
@@ -37,8 +37,14 @@ pub struct ScatterNetPutBlobInner {
     pub hash: Hash,
     pub hkey: RwLock<Option<Hkey>>,
     pub net: Arc<ScatterNet>,
-    pub peers: Vec<Arc<Peer>>,
-    pub puts: RwLock<Vec<Pin<Box<PeerPutBlob>>>>,
+    pub puts: RwLock<Vec<Put>>,
+}
+
+#[derive(Debug)]
+pub struct Put {
+    pub future: Option<Pin<Box<PeerPutBlob>>>,
+    pub peer: Option<Arc<Peer>>,
+    pub peer_group: Arc<PeerGroup>,
 }
 
 #[derive(Clone, Debug)]
@@ -71,11 +77,15 @@ impl ScatterNetPutBlob {
 
     #[inline]
     pub fn new(blob: Bytes, hash: Hash, hkey: Option<Hkey>, net: Arc<ScatterNet>) -> Self {
-        let peers: Vec<Arc<crate::Peer>> = net
+        let puts: Vec<Put> = net
             .peer_groups
             .read()
             .iter()
-            .filter_map(|group| group.get_peer_by_hash(&hash))
+            .map(|group| Put {
+                future: None,
+                peer: None,
+                peer_group: group.clone(),
+            })
             .collect();
 
         let inner = ScatterNetPutBlobInner {
@@ -83,8 +93,7 @@ impl ScatterNetPutBlob {
             hash,
             hkey: RwLock::new(hkey),
             net,
-            peers,
-            puts: RwLock::default(),
+            puts: RwLock::new(puts),
         };
 
         Self {
