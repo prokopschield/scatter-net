@@ -16,3 +16,4 @@ mod send_datagram;
 
 pub use begin_interaction::PeerBeginInteractionError;
 pub use fetch_blob::PeerFetchBlobError;
+pub use put_blob::{PeerPutBlob, PeerPutBlobError};

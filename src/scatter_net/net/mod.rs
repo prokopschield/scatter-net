@@ -8,6 +8,7 @@ use iroh::{Endpoint, NodeId};
 pub use methods::*;
 use parking_lot::RwLock;
 use ps_datalake::lake::DataLake;
+use ps_hash::Hash;
 pub use types::*;
 
 use super::{peer::Peer, peer_group::PeerGroup};
@@ -20,5 +21,6 @@ pub struct ScatterNet {
     node_id: NodeId,
     peers: Arc<RwLock<HashMap<NodeId, Arc<Peer>>>>,
     peer_groups: Arc<RwLock<Vec<Arc<PeerGroup>>>>,
+    put_cache: Arc<RwLock<HashMap<Hash, ScatterNetPutBlob>>>,
     state: Arc<RwLock<NetState>>,
 }

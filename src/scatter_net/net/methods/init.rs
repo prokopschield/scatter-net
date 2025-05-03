@@ -37,6 +37,7 @@ impl ScatterNet {
             node_id,
             peer_groups: Arc::default(),
             peers: Arc::default(),
+            put_cache: Arc::default(),
             state: Arc::from(RwLock::new(state)),
         };
 

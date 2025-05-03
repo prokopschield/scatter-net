@@ -1,5 +1,6 @@
 mod methods;
 
+use bytes::Bytes;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -11,8 +12,8 @@ pub enum FetchResponse {
     NotFound,
 
     /// Successfully retreived encrypted `DataChunk`.
-    Success(Vec<u8>),
+    Success(Bytes),
 
     /// Suggests a node to talk to.
-    Suggest(Vec<u8>),
+    Suggest(Bytes),
 }

@@ -21,6 +21,7 @@ impl Peer {
     }
 }
 
+#[derive(Debug)]
 pub struct PeerPutBlob {
     interaction: Interaction,
 }

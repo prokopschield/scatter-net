@@ -5,7 +5,7 @@ use ps_str::Utf8Encoder;
 use crate::{FetchResponse, Packet, PacketProcessError, Peer, ScatterNet};
 
 impl FetchResponse {
-    pub async fn process(&self, peer: Arc<Peer>) -> Result<Option<Packet>, PacketProcessError> {
+    pub async fn process(self, peer: Arc<Peer>) -> Result<Option<Packet>, PacketProcessError> {
         match self {
             Self::Error => {
                 eprintln!(
@@ -20,9 +20,7 @@ impl FetchResponse {
                 );
             }
             Self::Success(blob) => {
-                let hkey = ScatterNet::put_blob(peer.net().clone(), blob)
-                    .await
-                    .map_err(PacketProcessError::Put)?;
+                let hkey = ScatterNet::put_blob(peer.net(), blob)?.await?;
 
                 let hkey = hkey.to_string();
 

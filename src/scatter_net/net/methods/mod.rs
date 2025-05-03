@@ -11,3 +11,4 @@ mod put_blob;
 
 pub use fetch_blob::ScatterNetFetchBlobError;
 pub use fetch_encrypted_chunk::ScatterNetFetchEncryptedChunkError;
+pub use put_blob::{ScatterNetPutBlob, ScatterNetPutBlobError};

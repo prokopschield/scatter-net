@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{Packet, Peer};
 
 impl Packet {
-    pub async fn process(&self, peer: Arc<Peer>) -> Result<Option<Self>, PacketProcessError> {
+    pub async fn process(self, peer: Arc<Peer>) -> Result<Option<Self>, PacketProcessError> {
         use PacketProcessError::ReceivedErrorPacket;
 
         match self {
@@ -21,7 +21,7 @@ impl Packet {
 #[derive(thiserror::Error, Debug)]
 pub enum PacketProcessError {
     #[error(transparent)]
-    Put(anyhow::Error),
+    Put(#[from] crate::ScatterNetPutBlobError),
     #[error("The Peer sent an Error packet.")]
     ReceivedErrorPacket,
     #[error(transparent)]
