@@ -1,6 +1,5 @@
 use std::{future::Future, pin::Pin, sync::Arc};
 
-use anyhow::Result;
 use bytes::Bytes;
 use parking_lot::RwLock;
 use ps_cypher::extract_encrypted;
@@ -10,10 +9,7 @@ use ps_hkey::{Hkey, LongHkeyExpanded};
 use crate::{Peer, PeerGroup, PeerPutBlob, ScatterNet};
 
 impl ScatterNet {
-    pub fn put_blob(
-        self: &Arc<Self>,
-        blob: Bytes,
-    ) -> Result<ScatterNetPutBlob, ScatterNetPutBlobError> {
+    pub fn put_blob(self: &Arc<Self>, blob: Bytes) -> Result {
         let hash = Hash::hash(&blob)?;
 
         if let Some(from_cache) = self.put_cache.read().get(&hash) {
@@ -51,7 +47,7 @@ pub struct Put {
     pub peer_group: Arc<PeerGroup>,
 }
 
-pub type LongHkeyResult = Result<LongHkeyExpanded, ScatterNetPutBlobError>;
+pub type LongHkeyResult = Result<LongHkeyExpanded>;
 pub type LongHkeyFuture = dyn Future<Output = LongHkeyResult> + Send + Sync;
 
 pub enum State {
@@ -168,7 +164,7 @@ impl ScatterNetPutBlob {
 }
 
 impl Future for ScatterNetPutBlob {
-    type Output = Result<Hkey, ScatterNetPutBlobError>;
+    type Output = Result<Hkey>;
 
     fn poll(
         self: std::pin::Pin<&mut Self>,
@@ -186,3 +182,5 @@ pub enum ScatterNetPutBlobError {
     #[error(transparent)]
     Hkey(#[from] ps_hkey::PsHkeyError),
 }
+
+type Result<T = ScatterNetPutBlob, E = ScatterNetPutBlobError> = std::result::Result<T, E>;
