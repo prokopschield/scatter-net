@@ -25,6 +25,8 @@ impl ScatterNet {
 
         net.put_cache.write().insert(hash, future.clone());
 
+        future.background();
+
         Ok(future)
     }
 }
@@ -45,6 +47,13 @@ pub struct ScatterNetPutBlob {
 }
 
 impl ScatterNetPutBlob {
+    /// Executes this [`Future`] in the background via [`crate::spawn_and_forget`].
+    pub fn background(&self) {
+        let future = self.clone();
+
+        crate::spawn_and_forget(async move { Ok(future.await?) });
+    }
+
     #[must_use]
     pub fn get_blob(&self) -> Option<Bytes> {
         self.inner.blob.read().clone()
