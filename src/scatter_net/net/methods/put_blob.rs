@@ -3,6 +3,7 @@ use std::{future::Future, pin::Pin, sync::Arc};
 use anyhow::Result;
 use bytes::Bytes;
 use parking_lot::RwLock;
+use ps_cypher::extract_encrypted;
 use ps_hash::Hash;
 use ps_hkey::Hkey;
 
@@ -37,7 +38,12 @@ pub struct ScatterNetPutBlobInner {
     pub hash: Hash,
     pub hkey: RwLock<Option<Hkey>>,
     pub net: Arc<ScatterNet>,
-    pub puts: RwLock<Vec<Put>>,
+    pub state: RwLock<State>,
+}
+
+#[derive(Debug)]
+pub struct Part {
+    pub future: Pin<Box<ScatterNetPutBlob>>,
 }
 
 #[derive(Debug)]
@@ -45,6 +51,12 @@ pub struct Put {
     pub future: Option<Pin<Box<PeerPutBlob>>>,
     pub peer: Option<Arc<Peer>>,
     pub peer_group: Arc<PeerGroup>,
+}
+
+#[derive(Debug)]
+pub enum State {
+    Parts(Vec<Part>),
+    Puts(Vec<Put>),
 }
 
 #[derive(Clone, Debug)]
@@ -77,6 +89,31 @@ impl ScatterNetPutBlob {
 
     #[inline]
     pub fn new(blob: Bytes, hash: Hash, hkey: Option<Hkey>, net: Arc<ScatterNet>) -> Self {
+        // chunk + deflate + poly1305 + RS(255,231)
+        // 4096 B + 5 B + 16 B + 496 B = 4613 B
+        if blob.len() > 4613 {
+            return Self::new_split(blob, hash, hkey, net);
+        }
+
+        let codeword = match extract_encrypted(&blob) {
+            Err(_) => return Self::new_split(blob, hash, hkey, net),
+            Ok(codeword) => codeword,
+        };
+
+        if *codeword.codeword == *blob {
+            return Self::new_put(blob, hash, hkey, net);
+        };
+
+        // store corrected; try_into_buffer() is infallible here
+        if let Ok(buffer) = codeword.codeword.try_into_buffer() {
+            Self::new_put(Bytes::from_owner(buffer), hash, hkey.clone(), net.clone()).background();
+        };
+
+        // store actual blob with which put was called
+        Self::new_split(blob, hash, hkey, net)
+    }
+
+    pub fn new_put(blob: Bytes, hash: Hash, hkey: Option<Hkey>, net: Arc<ScatterNet>) -> Self {
         let puts: Vec<Put> = net
             .peer_groups
             .read()
@@ -93,12 +130,17 @@ impl ScatterNetPutBlob {
             hash,
             hkey: RwLock::new(hkey),
             net,
-            puts: RwLock::new(puts),
+            state: RwLock::new(State::Puts(puts)),
         };
 
         Self {
             inner: Arc::new(inner),
         }
+    }
+
+    pub fn new_split(blob: Bytes, hash: Hash, hkey: Option<Hkey>, net: Arc<ScatterNet>) -> Self {
+        let _ = (blob, hash, hkey, net);
+        todo!()
     }
 }
 
