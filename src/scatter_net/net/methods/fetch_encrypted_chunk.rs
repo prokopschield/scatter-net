@@ -114,11 +114,15 @@ impl<'lt> Future for ScatterNetFetchEncryptedChunk<'lt> {
                 }
             });
 
-            if let Ready(Some(chunk)) = future.poll(cx) {
-                this.value.replace(chunk);
-            }
-
-            this.futures.write().push(future);
+            match future.poll(cx) {
+                Pending => {
+                    this.futures.write().push(future);
+                }
+                Ready(Some(chunk)) => {
+                    this.value.replace(chunk);
+                }
+                Ready(None) => (),
+            };
         };
 
         if let Some(peer_group) = this.peer_groups.pop_front() {
