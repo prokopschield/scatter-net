@@ -12,7 +12,7 @@ use std::{
 use anyhow::Result;
 use n0_future::FutureExt;
 use parking_lot::RwLock;
-use ps_buffer::{BufferError, ToBuffer};
+use ps_buffer::BufferError;
 use ps_datachunk::{DataChunk, SerializedDataChunk};
 use ps_datalake::error::PsDataLakeError;
 use ps_hkey::{Hash, Hkey};
@@ -107,10 +107,9 @@ impl<'lt> Future for ScatterNetFetchEncryptedChunk<'lt> {
                 let fetched = Peer::fetch_blob(peer, Hkey::Direct(hash), 1, false).await;
 
                 match fetched {
-                    Ok(Some(FetchResponse::Success(buffer))) => Some(
-                        SerializedDataChunk::from_serialized_buffer(buffer.to_buffer().ok()?)
-                            .ok()?,
-                    ),
+                    Ok(Some(FetchResponse::Success(buffer))) => {
+                        SerializedDataChunk::from_data(buffer).ok()
+                    }
                     _ => None,
                 }
             });
