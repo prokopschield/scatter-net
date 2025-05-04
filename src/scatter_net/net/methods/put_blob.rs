@@ -39,7 +39,6 @@ pub struct Part {
     pub future: Pin<Box<ScatterNetPutBlob>>,
 }
 
-#[derive(Debug)]
 pub struct Put {
     pub future: Option<Pin<Box<PeerPutBlob>>>,
     pub peer: Option<Arc<Peer>>,
