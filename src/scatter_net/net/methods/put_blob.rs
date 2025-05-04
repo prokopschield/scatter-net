@@ -113,7 +113,7 @@ impl ScatterNetPutBlob {
         let hkey = net
             .lake
             .put_encrypted_chunk(&chunk)
-            .unwrap_or(hash.clone().into());
+            .unwrap_or_else(|_| hash.clone().into());
 
         let puts: Vec<Put> = net
             .peer_groups
