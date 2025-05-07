@@ -1,4 +1,9 @@
-use std::{future::Future, pin::Pin, sync::Arc, task::Poll::*};
+use std::{
+    future::Future,
+    pin::Pin,
+    sync::Arc,
+    task::Poll::{Pending, Ready},
+};
 
 use bytes::Bytes;
 use n0_future::FutureExt;
@@ -173,6 +178,8 @@ impl ScatterNetPutBlob {
         &mut self,
         cx: &mut std::task::Context<'_>,
     ) -> Result<Option<Hkey>, ScatterNetPutBlobError> {
+        use PutResponse::{Failure, LimitExceeded, Success};
+
         let mut guard = self.inner.state.write();
 
         let mut pending = false;
@@ -186,10 +193,8 @@ impl ScatterNetPutBlob {
                             pending = true;
                             false
                         }
-                        Ready(Err(_)) => true,
-                        Ready(Ok(PutResponse::Failure)) => true,
-                        Ready(Ok(PutResponse::LimitExceeded)) => true,
-                        Ready(Ok(PutResponse::Success(hkey_str))) => {
+                        Ready(Err(_) | Ok(Failure | LimitExceeded)) => true,
+                        Ready(Ok(Success(hkey_str))) => {
                             let redo = hkey_str.as_bytes() != self.inner.hash.as_bytes();
                             *promise = Promise::Resolved(PutResponse::Success(hkey_str));
                             redo
@@ -203,23 +208,21 @@ impl ScatterNetPutBlob {
 
                 pending = true;
 
-                let peer = match put.peer_group.get_peer_by_hash(self.get_hash()) {
-                    Some(peer) => peer,
-                    None => continue,
+                let Some(peer) = put.peer_group.get_peer_by_hash(self.get_hash()) else {
+                    continue;
                 };
 
                 let bytes = self.inner.blob.read().clone();
-                let bytes = match bytes {
-                    Some(bytes) => bytes,
-                    None => {
-                        let chunk = self.inner.net.lake.get_encrypted_chunk(self.get_hash())?;
-                        let buffer = chunk.data_ref().to_shared_buffer()?;
-                        let bytes = Bytes::from_owner(buffer);
+                let bytes = if let Some(bytes) = bytes {
+                    bytes
+                } else {
+                    let chunk = self.inner.net.lake.get_encrypted_chunk(self.get_hash())?;
+                    let buffer = chunk.data_ref().to_shared_buffer()?;
+                    let bytes = Bytes::from_owner(buffer);
 
-                        *self.inner.blob.write() = Some(bytes.clone());
+                    *self.inner.blob.write() = Some(bytes.clone());
 
-                        bytes
-                    }
+                    bytes
                 };
 
                 let future = peer.clone().put_blob(bytes);
@@ -228,6 +231,8 @@ impl ScatterNetPutBlob {
                 put.future = Some(Promise::new(future));
             }
         }
+
+        drop(guard);
 
         let _ = pending;
 
