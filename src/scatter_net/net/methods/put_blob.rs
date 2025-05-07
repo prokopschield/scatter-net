@@ -13,7 +13,7 @@ use ps_cypher::extract_encrypted;
 use ps_datachunk::{BorrowedDataChunk, DataChunk};
 use ps_hash::Hash;
 use ps_hkey::{Hkey, LongHkeyExpanded};
-use ps_promise::Promise;
+use ps_promise::{Promise, PromiseRejection};
 
 use crate::{Peer, PeerGroup, PeerPutBlobError, PutResponse, ScatterNet};
 
@@ -55,7 +55,7 @@ pub struct Put {
 
 pub enum State {
     Puts(Vec<Put>),
-    Split(Promise<LongHkeyExpanded, ScatterNetPutBlobError>),
+    Split(Promise<Hkey, ScatterNetPutBlobError>),
 }
 
 #[derive(Clone)]
@@ -149,7 +149,7 @@ impl ScatterNetPutBlob {
         let net_clone = net.clone();
 
         let future = async move {
-            LongHkeyExpanded::from_blob_async(
+            let hkey = LongHkeyExpanded::from_blob_async::<ScatterNetPutBlobError, _, _, _>(
                 &|data: &[u8]| {
                     let net = net_clone.clone();
                     let bytes = Bytes::copy_from_slice(data);
@@ -157,7 +157,17 @@ impl ScatterNetPutBlob {
                 },
                 &blob,
             )
-            .await
+            .await?;
+
+            let hkey = hkey
+                .shrink_async::<ScatterNetPutBlobError, _, _, _>(&|data: &[u8]| {
+                    let net = net_clone.clone();
+                    let bytes = Bytes::copy_from_slice(data);
+                    async move { net.put_blob(bytes)?.await }
+                })
+                .await?;
+
+            Ok(hkey)
         };
 
         let inner = ScatterNetPutBlobInner {
@@ -182,9 +192,9 @@ impl ScatterNetPutBlob {
 
         let mut guard = self.inner.state.write();
 
-        let mut pending = false;
-
         if let State::Puts(puts) = &mut *guard {
+            let mut pending = false;
+
             for put in puts {
                 let redo = match &mut put.future {
                     None => true,
@@ -230,13 +240,38 @@ impl ScatterNetPutBlob {
                 put.peer = Some(peer);
                 put.future = Some(Promise::new(future));
             }
+
+            if pending {
+                Ok(None)
+            } else {
+                Ok(self
+                    .get_hkey()
+                    .or_else(|| Some(Hkey::Direct(self.inner.hash.clone()))))
+            }
+        } else if let State::Split(promise) = &mut *guard {
+            let poll = promise.poll(cx);
+
+            if let Ready(result) = poll {
+                match result {
+                    Ok(hkey) => {
+                        *promise = Promise::Resolved(hkey.clone());
+                        *self.inner.hkey.write() = Some(hkey.clone());
+
+                        Ok(Some(hkey))
+                    }
+                    Err(err) => match err {
+                        PromiseRejection::Err(err) => Err(err),
+                        PromiseRejection::PromiseConsumedAlready => {
+                            Err(ScatterNetPutBlobError::Promise)
+                        }
+                    },
+                }
+            } else {
+                Ok(None)
+            }
+        } else {
+            unreachable!()
         }
-
-        drop(guard);
-
-        let _ = pending;
-
-        todo!();
     }
 }
 
@@ -265,6 +300,8 @@ pub enum ScatterNetPutBlobError {
     Hkey(#[from] ps_hkey::PsHkeyError),
     #[error(transparent)]
     Lake(#[from] ps_datalake::error::PsDataLakeError),
+    #[error("Internal Promise error.")]
+    Promise,
 }
 
 type Result<T = ScatterNetPutBlob, E = ScatterNetPutBlobError> = std::result::Result<T, E>;
