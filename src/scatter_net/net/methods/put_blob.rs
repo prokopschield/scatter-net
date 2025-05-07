@@ -182,7 +182,10 @@ impl ScatterNetPutBlob {
                 let redo = match &mut put.future {
                     None => true,
                     Some(promise) => match promise.poll(cx) {
-                        Pending => false,
+                        Pending => {
+                            pending = true;
+                            false
+                        }
                         Ready(Err(_)) => true,
                         Ready(Ok(PutResponse::Failure)) => true,
                         Ready(Ok(PutResponse::LimitExceeded)) => true,
