@@ -20,11 +20,12 @@ n0-future = "0.1.3"
 parking_lot = { version = "0.12.3", features = ["arc_lock"] }
 ps-buffer = "0.1.0-18"
 ps-cypher = "0.1.0-16"
-ps-datachunk = "0.1.0-19"
+ps-datachunk = "0.1.0-20"
 ps-datalake = { path = "../ps-datalake" }
 ps-deflate = "0.1.0-12"
 ps-hash = "0.1.0-12"
-ps-hkey = "0.1.0-10"
+ps-hkey = "0.1.0-11"
+ps-promise = "0.1.0-3"
 ps-range = "0.1.0-2"
 ps-str = "0.1.0-2"
 serde = { version = "1.0.219", features = ["serde_derive"] }

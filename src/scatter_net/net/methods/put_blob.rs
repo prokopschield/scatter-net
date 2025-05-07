@@ -1,13 +1,16 @@
-use std::{future::Future, pin::Pin, sync::Arc};
+use std::{future::Future, pin::Pin, sync::Arc, task::Poll::*};
 
 use bytes::Bytes;
+use n0_future::FutureExt;
 use parking_lot::RwLock;
+use ps_buffer::ToSharedBuffer;
 use ps_cypher::extract_encrypted;
-use ps_datachunk::BorrowedDataChunk;
+use ps_datachunk::{BorrowedDataChunk, DataChunk};
 use ps_hash::Hash;
 use ps_hkey::{Hkey, LongHkeyExpanded};
+use ps_promise::Promise;
 
-use crate::{Peer, PeerGroup, PeerPutBlob, ScatterNet};
+use crate::{Peer, PeerGroup, PeerPutBlobError, PutResponse, ScatterNet};
 
 impl ScatterNet {
     pub fn put_blob(self: &Arc<Self>, blob: Bytes) -> Result {
@@ -40,17 +43,14 @@ pub struct Part {
 }
 
 pub struct Put {
-    pub future: Option<Pin<Box<PeerPutBlob>>>,
+    pub future: Option<Promise<PutResponse, PeerPutBlobError>>,
     pub peer: Option<Arc<Peer>>,
     pub peer_group: Arc<PeerGroup>,
 }
 
-pub type LongHkeyResult = Result<LongHkeyExpanded>;
-pub type LongHkeyFuture = dyn Future<Output = LongHkeyResult> + Send + Sync;
-
 pub enum State {
     Puts(Vec<Put>),
-    Split(Pin<Box<LongHkeyFuture>>),
+    Split(Promise<LongHkeyExpanded, ScatterNetPutBlobError>),
 }
 
 #[derive(Clone)]
@@ -160,12 +160,75 @@ impl ScatterNetPutBlob {
             hash,
             hkey: RwLock::new(hkey),
             net,
-            state: RwLock::new(State::Split(Box::pin(future))),
+            state: RwLock::new(State::Split(Promise::new(future))),
         };
 
         Ok(Self {
             inner: Arc::new(inner),
         })
+    }
+
+    /// Performs a single iteration of the future, advancing the process of propagating the blob to all intended peers.
+    pub fn run(
+        &mut self,
+        cx: &mut std::task::Context<'_>,
+    ) -> Result<Option<Hkey>, ScatterNetPutBlobError> {
+        let mut guard = self.inner.state.write();
+
+        let mut pending = false;
+
+        if let State::Puts(puts) = &mut *guard {
+            for put in puts {
+                let redo = match &mut put.future {
+                    None => true,
+                    Some(promise) => match promise.poll(cx) {
+                        Pending => false,
+                        Ready(Err(_)) => true,
+                        Ready(Ok(PutResponse::Failure)) => true,
+                        Ready(Ok(PutResponse::LimitExceeded)) => true,
+                        Ready(Ok(PutResponse::Success(hkey_str))) => {
+                            let redo = hkey_str.as_bytes() != self.inner.hash.as_bytes();
+                            *promise = Promise::Resolved(PutResponse::Success(hkey_str));
+                            redo
+                        }
+                    },
+                };
+
+                if !redo {
+                    continue;
+                }
+
+                pending = true;
+
+                let peer = match put.peer_group.get_peer_by_hash(self.get_hash()) {
+                    Some(peer) => peer,
+                    None => continue,
+                };
+
+                let bytes = self.inner.blob.read().clone();
+                let bytes = match bytes {
+                    Some(bytes) => bytes,
+                    None => {
+                        let chunk = self.inner.net.lake.get_encrypted_chunk(self.get_hash())?;
+                        let buffer = chunk.data_ref().to_shared_buffer()?;
+                        let bytes = Bytes::from_owner(buffer);
+
+                        *self.inner.blob.write() = Some(bytes.clone());
+
+                        bytes
+                    }
+                };
+
+                let future = peer.clone().put_blob(bytes);
+
+                put.peer = Some(peer);
+                put.future = Some(Promise::new(future));
+            }
+        }
+
+        let _ = pending;
+
+        todo!();
     }
 }
 
@@ -176,17 +239,24 @@ impl Future for ScatterNetPutBlob {
         self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Self::Output> {
-        let _ = cx;
-        todo!()
+        match self.get_mut().run(cx) {
+            Ok(None) => std::task::Poll::Pending,
+            Ok(Some(hkey)) => std::task::Poll::Ready(Ok(hkey)),
+            Err(err) => std::task::Poll::Ready(Err(err)),
+        }
     }
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum ScatterNetPutBlobError {
     #[error(transparent)]
+    Buffer(#[from] ps_buffer::BufferError),
+    #[error(transparent)]
     Hash(#[from] ps_hash::HashError),
     #[error(transparent)]
     Hkey(#[from] ps_hkey::PsHkeyError),
+    #[error(transparent)]
+    Lake(#[from] ps_datalake::error::PsDataLakeError),
 }
 
 type Result<T = ScatterNetPutBlob, E = ScatterNetPutBlobError> = std::result::Result<T, E>;
