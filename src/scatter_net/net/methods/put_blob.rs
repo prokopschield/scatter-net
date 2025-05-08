@@ -71,6 +71,11 @@ impl ScatterNetPutBlob {
         crate::spawn_and_forget(async move { Ok(future.await?) });
     }
 
+    #[inline]
+    pub const fn early_return(self) -> ScatterNetPutBlobEarlyReturn {
+        ScatterNetPutBlobEarlyReturn { future: self }
+    }
+
     #[must_use]
     pub fn get_blob(&self) -> Option<Bytes> {
         self.inner.blob.read().clone()
@@ -305,3 +310,23 @@ pub enum ScatterNetPutBlobError {
 }
 
 type Result<T = ScatterNetPutBlob, E = ScatterNetPutBlobError> = std::result::Result<T, E>;
+
+#[must_use = "This Future doesn't do anything unless polled or awaited."]
+pub struct ScatterNetPutBlobEarlyReturn {
+    future: ScatterNetPutBlob,
+}
+
+impl Future for ScatterNetPutBlobEarlyReturn {
+    type Output = Result<Hkey>;
+
+    fn poll(
+        self: Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Self::Output> {
+        if let Some(hkey) = self.future.get_hkey() {
+            return Ready(Ok(hkey));
+        }
+
+        self.get_mut().future.poll(cx)
+    }
+}
