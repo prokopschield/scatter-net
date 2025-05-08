@@ -37,6 +37,7 @@ pub struct ScatterNetFetchEncryptedChunk<'lt> {
     peer_groups: VecDeque<Arc<PeerGroup>>,
     value: Option<SerializedDataChunk>,
     timeout: Option<JoinHandle<()>>,
+    num_attempts_all_peers: u8,
 }
 
 impl<'lt> ScatterNetFetchEncryptedChunk<'lt> {
@@ -62,6 +63,7 @@ impl<'lt> ScatterNetFetchEncryptedChunk<'lt> {
             peer_groups,
             value: locally_found,
             timeout: None,
+            num_attempts_all_peers: 0,
         }
     }
 
@@ -132,6 +134,10 @@ impl<'lt> Future for ScatterNetFetchEncryptedChunk<'lt> {
         }
 
         if this.futures.read().len() == 0 && this.peer_groups.is_empty() {
+            if this.num_attempts_all_peers >= 3 {
+                return Ready(Err(ScatterNetFetchEncryptedChunkError::NotFound));
+            }
+
             let peers: Vec<Arc<Peer>> = this
                 .net
                 .peers
@@ -143,6 +149,8 @@ impl<'lt> Future for ScatterNetFetchEncryptedChunk<'lt> {
             for peer in peers {
                 request_from_peer(peer, hash.clone());
             }
+
+            this.num_attempts_all_peers += 1;
         };
 
         this.schedule(cx.waker().clone());
@@ -155,4 +163,6 @@ impl<'lt> Future for ScatterNetFetchEncryptedChunk<'lt> {
 pub enum ScatterNetFetchEncryptedChunkError {
     #[error(transparent)]
     BufferError(#[from] BufferError),
+    #[error("Unable to fetch the data in question.")]
+    NotFound,
 }
