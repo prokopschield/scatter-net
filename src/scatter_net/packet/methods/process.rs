@@ -12,7 +12,12 @@ impl Packet {
             Self::Ping => Ok(Some(Self::Pong)),
             Self::FetchRequest(_request) => todo!(),
             Self::FetchResponse(response) => response.process(peer).await,
-            Self::PutRequest(_request) => todo!(),
+            Self::PutRequest(request) => Ok(Some(
+                (peer.net().put_blob(request.data)?.early_return().await).map_or_else(
+                    |_| Self::PutResponse(crate::PutResponse::Failure),
+                    |hkey| Self::PutResponse(crate::PutResponse::Success(hkey.to_string())),
+                ),
+            )),
             Self::PutResponse(response) => {
                 eprintln!("Received unsolicited PutResponse({response:?}) from {peer}");
                 Ok(Some(Self::Error))
