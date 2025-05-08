@@ -1,4 +1,8 @@
+use std::task::Poll::{Pending, Ready};
+
 use n0_future::Stream;
+
+use crate::InteractionReadPacketResult;
 
 use crate::{Interaction, Packet};
 
@@ -7,19 +11,16 @@ impl Stream for Interaction {
 
     fn poll_next(
         self: std::pin::Pin<&mut Self>,
-        _cx: &mut std::task::Context<'_>,
+        cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Option<Self::Item>> {
-        let packet = self.packets.lock().pop_front();
+        use InteractionReadPacketResult::{NoMorePackets, NoPacketYet, ReceivedPacket};
 
-        packet.map_or_else(
-            || {
-                if *self.closed.read() {
-                    std::task::Poll::Ready(None)
-                } else {
-                    std::task::Poll::Pending
-                }
-            },
-            |packet| std::task::Poll::Ready(Some(packet)),
-        )
+        let this = self.get_mut();
+
+        match this.read_packet(cx) {
+            Ok(NoPacketYet) => Pending,
+            Ok(NoMorePackets) | Err(_) => Ready(None),
+            Ok(ReceivedPacket(packet)) => Ready(Some(packet)),
+        }
     }
 }

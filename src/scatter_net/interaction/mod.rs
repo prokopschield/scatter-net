@@ -2,6 +2,7 @@ mod implementations;
 mod methods;
 
 pub use methods::*;
+use ps_buffer::Buffer;
 
 use std::{collections::VecDeque, sync::Arc};
 
@@ -12,6 +13,7 @@ use super::{Packet, Peer};
 
 #[derive(Clone, Debug)]
 pub struct Interaction {
+    buffer: Arc<RwLock<Buffer>>,
     peer: Arc<Peer>,
     recv_stream: Arc<tokio::sync::Mutex<RecvStream>>,
     send_stream: Option<Arc<tokio::sync::Mutex<SendStream>>>,
