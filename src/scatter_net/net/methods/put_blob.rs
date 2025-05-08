@@ -158,7 +158,7 @@ impl ScatterNetPutBlob {
                 &|data: &[u8]| {
                     let net = net_clone.clone();
                     let bytes = Bytes::copy_from_slice(data);
-                    async move { net.put_blob(bytes)?.await }
+                    async move { net.put_blob(bytes)?.early_return().await }
                 },
                 &blob,
             )
