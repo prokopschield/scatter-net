@@ -16,12 +16,6 @@ impl Interaction {
             closed: Arc::default(),
         };
 
-        crate::spawn_and_forget(Self::listen(
-            interaction.recv_stream.clone(),
-            interaction.packets.clone(),
-            interaction.closed.clone(),
-        ));
-
         interaction
     }
 }
