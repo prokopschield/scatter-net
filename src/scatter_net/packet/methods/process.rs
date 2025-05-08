@@ -13,7 +13,10 @@ impl Packet {
             Self::FetchRequest(_request) => todo!(),
             Self::FetchResponse(response) => response.process(peer).await,
             Self::PutRequest(_request) => todo!(),
-            Self::PutResponse(_response) => todo!(),
+            Self::PutResponse(response) => {
+                eprintln!("Received unsolicited PutResponse({response:?}) from {peer}");
+                Ok(Some(Self::Error))
+            }
         }
     }
 }
