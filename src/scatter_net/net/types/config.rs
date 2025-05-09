@@ -22,12 +22,12 @@ pub struct NetConfig {
 
 impl NetConfig {
     pub fn populate(&mut self) -> Result<()> {
-        self.populate_stores()?;
+        self.populate_lake_config()?;
 
         Ok(())
     }
 
-    pub fn populate_stores(&mut self) -> Result<()> {
+    pub fn populate_lake_config(&mut self) -> Result<()> {
         // Check if there's already a writable store
         let has_writable = self.lake_config.store.iter().any(|entry| !entry.readonly);
 
