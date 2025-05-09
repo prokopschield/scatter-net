@@ -24,6 +24,7 @@ impl NetConfig {
     pub fn populate(&mut self) -> Result<()> {
         self.populate_lake_config()?;
         self.populate_peer_groups();
+        self.populate_secret_key();
 
         Ok(())
     }
@@ -102,6 +103,12 @@ impl NetConfig {
                     ..Default::default()
                 });
             }
+        }
+    }
+
+    pub fn populate_secret_key(&mut self) {
+        if self.secret_key.is_none() {
+            self.secret_key = Some(iroh::SecretKey::generate(rand::rngs::OsRng));
         }
     }
 }
