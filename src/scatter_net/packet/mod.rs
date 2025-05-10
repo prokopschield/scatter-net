@@ -2,9 +2,8 @@ mod methods;
 mod variants;
 
 pub use methods::*;
-pub use variants::{FetchRequest, FetchResponse, PutRequest, PutResponse};
-
 use serde::{Deserialize, Serialize};
+pub use variants::{FetchRequest, FetchResponse, PutRequest, PutResponse};
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Packet {

@@ -1,13 +1,12 @@
 mod implementations;
 mod methods;
 
-pub use methods::*;
-use ps_buffer::Buffer;
-
 use std::{collections::VecDeque, sync::Arc};
 
 use iroh::endpoint::{RecvStream, SendStream};
+pub use methods::*;
 use parking_lot::RwLock;
+use ps_buffer::Buffer;
 
 use super::{Packet, Peer};
 
