@@ -3,7 +3,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use iroh::endpoint::Connection;
 
-use crate::{Peer, PeerState, ScatterNet};
+use crate::{spawn_and_forget, Peer, PeerState, ScatterNet};
 
 impl ScatterNet {
     pub fn init_peer(
@@ -26,7 +26,11 @@ impl ScatterNet {
 
         drop(peers_guard);
 
-        // TODO put peer into PeerGroup
+        spawn_and_forget({
+            let peer = peer.clone();
+
+            async move { Ok(peer.select_peer_group().await?) }
+        });
 
         Ok(peer)
     }
