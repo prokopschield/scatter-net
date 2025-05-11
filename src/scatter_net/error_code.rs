@@ -9,4 +9,5 @@ pub enum ErrorCode {
 
     // Peer Errors
     PeerDropped = 16,
+    PingPongFailed = 17,
 }

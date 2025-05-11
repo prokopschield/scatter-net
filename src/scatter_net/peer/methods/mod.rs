@@ -12,6 +12,7 @@ mod net;
 mod node_id;
 mod put_blob;
 mod replace_connection;
+mod select_peer_group;
 mod send_datagram;
 
 pub use begin_interaction::PeerBeginInteractionError;
