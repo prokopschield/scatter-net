@@ -10,13 +10,13 @@ impl FetchResponse {
             Self::Error => {
                 eprintln!(
                     "Received spurious FetchResponse::Error from {}",
-                    peer.node_id()?
+                    peer.node_id()
                 );
             }
             Self::NotFound => {
                 eprintln!(
                     "Received spurious FetchResponse::NotFound from {}",
-                    peer.node_id()?
+                    peer.node_id()
                 );
             }
             Self::Success(blob) => {
@@ -30,7 +30,7 @@ impl FetchResponse {
                 eprintln!(
                     "Received spurious FetchResponse::Suggest({}) from {}",
                     node_id.to_utf8_string(),
-                    peer.node_id()?,
+                    peer.node_id(),
                 );
             }
         }
