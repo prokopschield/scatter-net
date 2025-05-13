@@ -1,10 +1,17 @@
-use std::{fs::File, io::Read};
+use std::{
+    fs::{exists, File},
+    io::Read,
+};
 
 use crate::NetConfig;
 
 impl NetConfig {
     /// Attempts to read a file and deserialize it into a `NetConfig`.
     pub fn from_file(filename: &str) -> Result<Self, NetConfigFromFileError> {
+        if !exists(filename)? {
+            return Ok(Self::default());
+        }
+
         let mut file = File::open(filename)?;
         let mut contents = String::new();
 
