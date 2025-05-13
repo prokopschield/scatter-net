@@ -1,13 +1,19 @@
 use std::{
     fs::{exists, File},
     io::Read,
+    path::Path,
 };
 
 use crate::NetConfig;
 
 impl NetConfig {
     /// Attempts to read a file and deserialize it into a `NetConfig`.
-    pub fn from_file(filename: &str) -> Result<Self, NetConfigFromFileError> {
+    pub fn from_file<P>(filename: P) -> Result<Self, NetConfigFromFileError>
+    where
+        P: AsRef<Path>,
+    {
+        let filename = filename.as_ref();
+
         if !exists(filename)? {
             return Ok(Self::default());
         }
