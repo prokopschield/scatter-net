@@ -1,6 +1,9 @@
+mod implementations;
 mod methods;
 
+pub use implementations::*;
 use iroh::SecretKey;
+pub use methods::*;
 use ps_datalake::lake::config::DataLakeConfig;
 use serde::{Deserialize, Serialize};
 

@@ -9,7 +9,7 @@ impl Peer {
     ) -> Result<(), PeerReplaceConnectionError> {
         let conn_node_id = connection
             .remote_node_id()
-            .map_err(|err| PeerReplaceConnectionError::ReadingNodeIdFailed(err))?;
+            .map_err(PeerReplaceConnectionError::ReadingNodeIdFailed)?;
 
         let own_node_id = self.node_id();
 
