@@ -29,6 +29,10 @@ impl Peer {
             state: Arc::new(RwLock::new(state)),
         };
 
-        Ok(Arc::from(peer))
+        let peer = Arc::from(peer);
+
+        peer.clone().listen();
+
+        Ok(peer)
     }
 }
