@@ -1,6 +1,7 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use n0_future::StreamExt;
+use tokio::time::sleep;
 
 use crate::{ErrorCode, Peer, PeerGroup, Terminate};
 
@@ -9,6 +10,8 @@ impl Peer {
     pub async fn select_peer_group(
         self: Arc<Self>,
     ) -> Result<Arc<PeerGroup>, PeerSelectPeerGroupError> {
+        sleep(Duration::from_secs(1)).await;
+
         let mut interaction = self.clone().begin_interaction().await?;
         let time_start = chrono::Local::now();
 
