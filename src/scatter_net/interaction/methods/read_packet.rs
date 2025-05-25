@@ -9,7 +9,7 @@ impl Interaction {
         &mut self,
         cx: &mut std::task::Context<'_>,
     ) -> Result<InteractionReadPacketResult, InteractionReadPacketError> {
-        use InteractionReadPacketResult::{NoPacketYet, ReceivedPacket};
+        use InteractionReadPacketResult::{NoMorePackets, NoPacketYet, ReceivedPacket};
 
         let mut buffer = self.buffer.write();
 
@@ -36,7 +36,13 @@ impl Interaction {
             Ready(Ok(num_bytes_read)) => {
                 current_offset += num_bytes_read;
 
-                if num_bytes_read == 0 {}
+                if num_bytes_read == 0 {
+                    // EOF - connection closed
+                    buffer.truncate(current_offset);
+                    drop(recv_stream);
+                    drop(buffer);
+                    return Ok(NoMorePackets);
+                }
             }
             Ready(Err(err)) => {
                 buffer.truncate(current_offset);
