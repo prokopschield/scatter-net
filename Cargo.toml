@@ -17,12 +17,12 @@ iroh = { version = "0.34.1", features = [
 n0-future = "0.1.3"
 parking_lot = { version = "0.12.3", features = ["arc_lock"] }
 ps-buffer = "0.1.0-18"
-ps-cypher = "0.1.0-16"
-ps-datachunk = "0.1.0-20"
-ps-datalake = "0.1.0-3"
-ps-deflate = "0.1.0-12"
-ps-hash = "0.1.0-12"
-ps-hkey = "0.1.0-11"
+ps-cypher = "0.1.0-18"
+ps-datachunk = "0.1.0-23"
+ps-datalake = { path = "../ps-datalake" }
+ps-deflate = "0.1.0-13"
+ps-hash = "0.1.0-14"
+ps-hkey = "0.1.0-15"
 ps-promise = "0.1.0-3"
 ps-range = "0.1.0-2"
 ps-str = "0.1.0-2"
