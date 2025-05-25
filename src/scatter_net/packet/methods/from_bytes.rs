@@ -13,7 +13,7 @@ impl Packet {
         let size = bytes.get(4..8).unwrap_or(&[]).try_into()?;
         let size = usize::try_from(u32::from_le_bytes(size))?;
 
-        let bytes = decompress(bytes, size)?;
+        let bytes = decompress(&bytes[8..], size)?;
 
         let packet = bitcode::deserialize(&bytes)?;
 
