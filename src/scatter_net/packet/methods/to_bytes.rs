@@ -12,9 +12,9 @@ impl Packet {
 
         let mut buffer = Buffer::alloc_uninit(ser_len + 13)?;
 
-        let com_len = compress_into(&serialized, &mut buffer[8..])?;
+        let com_len = 8 + compress_into(&serialized, &mut buffer[8..])?;
 
-        buffer.truncate(com_len + 8);
+        buffer.truncate(com_len);
 
         let com_len = u32::try_from(com_len)?;
         let ser_len = u32::try_from(ser_len)?;
