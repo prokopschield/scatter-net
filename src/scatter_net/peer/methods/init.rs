@@ -14,7 +14,7 @@ impl Peer {
     ) -> Result<Arc<Self>> {
         let node_id = connection.remote_node_id()?;
 
-        let mut state = state.unwrap_or(PeerState {
+        let mut state = state.unwrap_or_else(|| PeerState {
             node_id,
             terminated: false,
             usage: PeerUsage::default(),
