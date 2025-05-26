@@ -10,7 +10,7 @@ anyhow = { version = "1.0.98", features = ["backtrace"] }
 bitcode = { version = "0.6.6", features = ["serde"] }
 bytes = { version = "1.10.1", features = ["serde"] }
 chrono = "0.4.41"
-iroh = { version = "0.34.1", features = [
+iroh = { version = "0.35.0", features = [
   "discovery-local-network",
   "discovery-pkarr-dht",
 ] }
