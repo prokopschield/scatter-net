@@ -10,6 +10,7 @@ mod listen_dg;
 mod listen_uni;
 mod net;
 mod node_id;
+mod ping;
 mod put_blob;
 mod replace_connection;
 mod select_peer_group;
@@ -17,4 +18,5 @@ mod send_datagram;
 
 pub use begin_interaction::PeerBeginInteractionError;
 pub use fetch_blob::PeerFetchBlobError;
+pub use ping::PeerPingError;
 pub use put_blob::{PeerPutBlob, PeerPutBlobError};
