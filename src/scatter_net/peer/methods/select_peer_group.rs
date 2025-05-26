@@ -20,7 +20,7 @@ impl Peer {
         let pong = interaction.next().await;
         let time_end = chrono::Local::now();
 
-        if pong != Some(crate::Packet::Pong) {
+        if !matches!(pong, Some(Ok(crate::Packet::Pong))) {
             self.terminate(
                 ErrorCode::PingPongFailed as u8,
                 &"Failed to play ping pong.",

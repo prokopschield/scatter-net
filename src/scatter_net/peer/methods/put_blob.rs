@@ -142,7 +142,12 @@ impl Future for PeerPutBlob {
 
                             return Ready(Err(PeerPutBlobError::DidNotRespond));
                         }
-                        Ready(Some(packet)) => packet,
+                        Ready(Some(Ok(packet))) => packet,
+                        Ready(Some(Err(err))) => {
+                            this.state = PeerPutBlobState::Failed;
+
+                            return Ready(Err(PeerPutBlobError::ReadPacket(err)));
+                        }
                     };
 
                     // Process the received packet
@@ -194,6 +199,8 @@ pub enum PeerPutBlobError {
     MultipleAwaits,
     #[error("This is an internal exception which you shouldn't encounter.")]
     ProcessingState,
+    #[error("Failed to read packet: {0}")]
+    ReadPacket(#[from] crate::InteractionReadPacketError),
     #[error(transparent)]
     SendPacket(#[from] crate::InteractionSendPacketError),
 }

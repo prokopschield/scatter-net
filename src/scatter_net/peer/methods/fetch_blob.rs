@@ -25,11 +25,13 @@ impl Peer {
         interaction.send_packet(packet).await?;
 
         while let Some(response) = interaction.next().await {
-            if let Packet::FetchResponse(response) = response {
+            let packet = response?;
+
+            if let Packet::FetchResponse(response) = packet {
                 return Ok(Some(response));
             }
 
-            response.process(self.clone()).await?;
+            packet.process(self.clone()).await?;
         }
 
         Ok(None)
@@ -42,6 +44,8 @@ pub enum PeerFetchBlobError {
     BeginInteraction(#[from] crate::PeerBeginInteractionError),
     #[error(transparent)]
     PacketProcessError(#[from] crate::PacketProcessError),
+    #[error("Error reading packet: {0}")]
+    ReadPacket(#[from] crate::InteractionReadPacketError),
     #[error(transparent)]
     SendPacket(#[from] crate::InteractionSendPacketError),
 }
