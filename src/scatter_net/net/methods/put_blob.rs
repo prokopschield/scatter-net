@@ -17,6 +17,8 @@ use ps_promise::{Promise, PromiseRejection};
 
 use crate::{Peer, PeerGroup, PeerPutBlobError, PutResponse, ScatterNet};
 
+use super::ScatterNetPutEncrypted;
+
 impl ScatterNet {
     pub fn put_blob(self: &Arc<Self>, blob: Bytes) -> Result {
         let hash = Arc::new(Hash::hash(&blob)?);
@@ -54,6 +56,7 @@ pub struct Put {
 }
 
 pub enum State {
+    PutEncrypted(ScatterNetPutEncrypted),
     Puts(Vec<Put>),
     Split(Promise<Hkey, ScatterNetPutBlobError>),
 }
@@ -100,12 +103,16 @@ impl ScatterNetPutBlob {
         }
 
         let codeword = match extract_encrypted(&blob) {
-            Err(_) => return Self::new_split(blob, hash, net),
+            Err(_) => {
+                // TODO unencrypted
+
+                return Self::new_split(blob, hash, net);
+            }
             Ok(codeword) => codeword,
         };
 
         if *codeword.codeword == *blob {
-            return Self::new_put(blob, hash, net);
+            return Ok(Self::new_put_encrypted(blob, hash.clone(), net.clone())?);
         };
 
         // store corrected; try_into_buffer() is infallible here
@@ -115,6 +122,28 @@ impl ScatterNetPutBlob {
 
         // store actual blob with which put was called
         Self::new_split(blob, hash, net)
+    }
+
+    pub fn new_put_encrypted(blob: Bytes, hash: Arc<Hash>, net: Arc<ScatterNet>) -> Result {
+        let chunk = BorrowedDataChunk::from_parts(&blob, hash.clone());
+        let hkey = net
+            .lake
+            .put_encrypted_chunk(&chunk)
+            .unwrap_or_else(|_| hash.clone().into());
+
+        let put = net.clone().put_encrypted(&blob)?;
+
+        let inner = ScatterNetPutBlobInner {
+            blob: RwLock::new(Some(blob)),
+            hash,
+            hkey: RwLock::new(Some(hkey)),
+            net,
+            state: RwLock::new(State::PutEncrypted(put)),
+        };
+
+        Ok(Self {
+            inner: Arc::new(inner),
+        })
     }
 
     pub fn new_put(blob: Bytes, hash: Arc<Hash>, net: Arc<ScatterNet>) -> Result {
@@ -307,6 +336,8 @@ pub enum ScatterNetPutBlobError {
     Lake(#[from] ps_datalake::error::PsDataLakeError),
     #[error("Internal Promise error.")]
     Promise,
+    #[error(transparent)]
+    PutEncrypted(#[from] crate::ScatterNetPutEncryptedError),
 }
 
 type Result<T = ScatterNetPutBlob, E = ScatterNetPutBlobError> = std::result::Result<T, E>;
