@@ -12,8 +12,10 @@ mod init_peer;
 mod init_peer_groups;
 mod put_blob;
 mod put_encrypted;
+mod put_raw;
 
 pub use fetch_blob::ScatterNetFetchBlobError;
 pub use fetch_encrypted_chunk::ScatterNetFetchEncryptedChunkError;
 pub use put_blob::{ScatterNetPutBlob, ScatterNetPutBlobError};
 pub use put_encrypted::{ScatterNetPutEncrypted, ScatterNetPutEncryptedError};
+pub use put_raw::{ScatterNetPutRaw, ScatterNetPutRawError};

@@ -17,7 +17,7 @@ use ps_promise::{Promise, PromiseRejection};
 
 use crate::{Peer, PeerGroup, PeerPutBlobError, PutResponse, ScatterNet};
 
-use super::ScatterNetPutEncrypted;
+use super::{ScatterNetPutEncrypted, ScatterNetPutRaw};
 
 impl ScatterNet {
     pub fn put_blob(self: &Arc<Self>, blob: Bytes) -> Result {
@@ -57,6 +57,7 @@ pub struct Put {
 
 pub enum State {
     PutEncrypted(ScatterNetPutEncrypted),
+    PutRaw(ScatterNetPutRaw),
     Puts(Vec<Put>),
     Split(Promise<Hkey, ScatterNetPutBlobError>),
 }
@@ -104,9 +105,7 @@ impl ScatterNetPutBlob {
 
         let codeword = match extract_encrypted(&blob) {
             Err(_) => {
-                // TODO unencrypted
-
-                return Self::new_split(blob, hash, net);
+                return Self::new_put_raw(blob, hash.clone(), net.clone());
             }
             Ok(codeword) => codeword,
         };
@@ -121,7 +120,7 @@ impl ScatterNetPutBlob {
         };
 
         // store actual blob with which put was called
-        Self::new_split(blob, hash, net)
+        Self::new_put_raw(blob, hash.clone(), net.clone())
     }
 
     pub fn new_put_encrypted(blob: Bytes, hash: Arc<Hash>, net: Arc<ScatterNet>) -> Result {
@@ -139,6 +138,28 @@ impl ScatterNetPutBlob {
             hkey: RwLock::new(Some(hkey)),
             net,
             state: RwLock::new(State::PutEncrypted(put)),
+        };
+
+        Ok(Self {
+            inner: Arc::new(inner),
+        })
+    }
+
+    pub fn new_put_raw(blob: Bytes, hash: Arc<Hash>, net: Arc<ScatterNet>) -> Result {
+        let chunk = BorrowedDataChunk::from_parts(&blob, hash.clone());
+        let hkey = net
+            .lake
+            .put_encrypted_chunk(&chunk)
+            .unwrap_or_else(|_| hash.clone().into());
+
+        let put = net.clone().put_raw(&blob)?;
+
+        let inner = ScatterNetPutBlobInner {
+            blob: RwLock::new(Some(blob)),
+            hash,
+            hkey: RwLock::new(Some(hkey)),
+            net,
+            state: RwLock::new(State::PutRaw(put)),
         };
 
         Ok(Self {
@@ -303,6 +324,18 @@ impl ScatterNetPutBlob {
             } else {
                 Ok(None)
             }
+        } else if let State::PutEncrypted(encrypted) = &mut *guard {
+            match encrypted.poll(cx) {
+                Pending => Ok(None),
+                Ready(Ok(hkey)) => Ok(Some(hkey)),
+                Ready(Err(err)) => Err(err)?,
+            }
+        } else if let State::PutRaw(raw) = &mut *guard {
+            match raw.poll(cx) {
+                Pending => Ok(None),
+                Ready(Ok(hkey)) => Ok(Some(hkey)),
+                Ready(Err(err)) => Err(err)?,
+            }
         } else {
             unreachable!()
         }
@@ -338,6 +371,8 @@ pub enum ScatterNetPutBlobError {
     Promise,
     #[error(transparent)]
     PutEncrypted(#[from] crate::ScatterNetPutEncryptedError),
+    #[error(transparent)]
+    PutRaw(#[from] crate::ScatterNetPutRawError),
 }
 
 type Result<T = ScatterNetPutBlob, E = ScatterNetPutBlobError> = std::result::Result<T, E>;
