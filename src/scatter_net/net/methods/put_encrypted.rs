@@ -6,7 +6,7 @@ use ps_buffer::{SharedBuffer, ToSharedBuffer};
 use ps_datachunk::OwnedDataChunk;
 use ps_hash::Hash;
 use ps_hkey::Hkey;
-use ps_promise::Promise;
+use ps_promise::{Promise, Transformer};
 
 use crate::{Peer, PeerGroup, PeerPutBlobError, PutResponse, ScatterNet};
 
@@ -105,6 +105,12 @@ impl Future for ScatterNetPutEncrypted {
                 } => {
                     let mut need_iteration = false;
 
+                    let to_hkey = Transformer::from_sync_fn(|response| match response {
+                        PutResponse::Success(hkey) => Ok(Hkey::parse(hkey.as_bytes())),
+                        PutResponse::Failure => Err(PutResponseInternalError::Failure),
+                        PutResponse::LimitExceeded => Err(PutResponseInternalError::LimitExceeded),
+                    });
+
                     for target in &mut targets {
                         if let Some(promise) = &mut target.promise {
                             if let Ready(result) = promise.poll(cx) {
@@ -132,13 +138,7 @@ impl Future for ScatterNetPutEncrypted {
 
                                     peer.put_blob(bytes)
                                 })
-                                .then(|response| match response {
-                                    PutResponse::Success(hkey) => Ok(Hkey::parse(hkey.as_bytes())),
-                                    PutResponse::Failure => Err(PutResponseInternalError::Failure),
-                                    PutResponse::LimitExceeded => {
-                                        Err(PutResponseInternalError::LimitExceeded)
-                                    }
-                                }),
+                                .then(to_hkey.clone()),
                             );
 
                             need_iteration = true;
