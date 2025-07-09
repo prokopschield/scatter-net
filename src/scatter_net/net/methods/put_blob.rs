@@ -105,13 +105,13 @@ impl ScatterNetPutBlob {
 
         let codeword = match extract_encrypted(&blob) {
             Err(_) => {
-                return Self::new_put_raw(blob, hash.clone(), net.clone());
+                return Self::new_put_raw(blob, hash, net);
             }
             Ok(codeword) => codeword,
         };
 
         if *codeword.codeword == *blob {
-            return Ok(Self::new_put_encrypted(blob, hash.clone(), net.clone())?);
+            return Self::new_put_encrypted(blob, hash, net);
         };
 
         // store corrected; try_into_buffer() is infallible here
@@ -120,7 +120,7 @@ impl ScatterNetPutBlob {
         };
 
         // store actual blob with which put was called
-        Self::new_put_raw(blob, hash.clone(), net.clone())
+        Self::new_put_raw(blob, hash, net)
     }
 
     pub fn new_put_encrypted(blob: Bytes, hash: Arc<Hash>, net: Arc<ScatterNet>) -> Result {
