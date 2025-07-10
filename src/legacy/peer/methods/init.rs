@@ -4,7 +4,7 @@ use anyhow::Result;
 use iroh::endpoint::Connection;
 use parking_lot::RwLock;
 
-use crate::{scatter_net::peer::PeerState, Peer, PeerUsage, ScatterNet};
+use crate::{legacy::peer::PeerState, Peer, PeerUsage, ScatterNet};
 
 impl Peer {
     pub fn init(
