@@ -25,6 +25,7 @@ ps-hash = "0.1.0-17"
 ps-hkey = "0.1.0-21"
 ps-promise = "0.1.0-9"
 ps-range = "0.1.0-2"
+ps-rwt = "0.1.0-0"
 ps-str = "0.1.0-2"
 rand = "0.8.5"
 serde = { version = "1.0.219", features = ["serde_derive"] }
