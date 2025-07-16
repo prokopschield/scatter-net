@@ -112,12 +112,12 @@ impl ScatterNetPutBlob {
 
         if *codeword.codeword == *blob {
             return Self::new_put_encrypted(blob, hash, net);
-        };
+        }
 
         // store corrected; try_into_buffer() is infallible here
         if let Ok(buffer) = codeword.codeword.try_into_buffer() {
             Self::new_put(Bytes::from_owner(buffer), hash.clone(), net.clone())?.background();
-        };
+        }
 
         // store actual blob with which put was called
         Self::new_put_raw(blob, hash, net)

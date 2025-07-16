@@ -56,7 +56,7 @@ impl NetConfig {
                 if let Ok(entries) = fs::read_dir(lake_directory) {
                     for entry in entries.flatten() {
                         let path = entry.path();
-                        if path != lake_path && path.extension().map_or(false, |ext| ext == "lake")
+                        if path != lake_path && path.extension().is_some_and(|ext| ext == "lake")
                         {
                             self.lake_config.store.push(ConfigStoreEntry {
                                 filename: path.to_string_lossy().into_owned(),

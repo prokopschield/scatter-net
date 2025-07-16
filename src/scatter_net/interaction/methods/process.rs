@@ -13,7 +13,7 @@ impl Interaction {
                 }
                 Some(Err(err)) => return Err(err)?,
                 None => return Ok(()),
-            };
+            }
         }
     }
 }

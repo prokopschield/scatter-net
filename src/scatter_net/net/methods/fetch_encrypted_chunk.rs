@@ -79,7 +79,7 @@ impl<'lt> ScatterNetFetchEncryptedChunk<'lt> {
     }
 }
 
-impl<'lt> Future for ScatterNetFetchEncryptedChunk<'lt> {
+impl Future for ScatterNetFetchEncryptedChunk<'_> {
     type Output = Result<SerializedDataChunk, ScatterNetFetchEncryptedChunkError>;
 
     fn poll(
@@ -124,7 +124,7 @@ impl<'lt> Future for ScatterNetFetchEncryptedChunk<'lt> {
                     this.value.replace(chunk);
                 }
                 Ready(None) => (),
-            };
+            }
         };
 
         if let Some(peer_group) = this.peer_groups.pop_front() {
@@ -133,7 +133,7 @@ impl<'lt> Future for ScatterNetFetchEncryptedChunk<'lt> {
             }
         }
 
-        if this.futures.read().len() == 0 && this.peer_groups.is_empty() {
+        if this.futures.read().is_empty() && this.peer_groups.is_empty() {
             if this.num_attempts_all_peers >= 3 {
                 return Ready(Err(ScatterNetFetchEncryptedChunkError::NotFound));
             }
@@ -141,9 +141,7 @@ impl<'lt> Future for ScatterNetFetchEncryptedChunk<'lt> {
             let peers: Vec<Arc<Peer>> = this
                 .net
                 .peers
-                .read()
-                .iter()
-                .map(|(_, peer)| peer.clone())
+                .read().values().cloned()
                 .collect();
 
             for peer in peers {
@@ -151,7 +149,7 @@ impl<'lt> Future for ScatterNetFetchEncryptedChunk<'lt> {
             }
 
             this.num_attempts_all_peers += 1;
-        };
+        }
 
         this.schedule(cx.waker().clone());
 

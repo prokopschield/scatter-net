@@ -8,9 +8,7 @@ impl ScatterNet {
     pub fn get_state(&self) -> Result<NetState> {
         let peers: Vec<Arc<Peer>> = self
             .peers
-            .read()
-            .iter()
-            .map(|(_, peer)| peer.clone())
+            .read().values().cloned()
             .collect();
 
         let peers: Vec<PeerState> = peers.iter().map(|peer| peer.get_state()).collect();

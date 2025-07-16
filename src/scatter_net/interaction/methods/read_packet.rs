@@ -69,7 +69,7 @@ impl Interaction {
 
             // Likely returns [`Pending`]
             return self.read_packet(cx);
-        };
+        }
 
         let packet = Packet::from_bytes(&buffer[..expected_length])
             .map_err(InteractionReadPacketError::PacketFromBytes)?;

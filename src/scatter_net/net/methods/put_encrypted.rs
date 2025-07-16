@@ -122,7 +122,7 @@ impl Future for ScatterNetPutEncrypted {
 
                                 target.promise = None;
                             }
-                        };
+                        }
 
                         if target.hkey.is_some() {
                             continue;

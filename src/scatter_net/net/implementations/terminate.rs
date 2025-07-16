@@ -21,9 +21,7 @@ where
 
         let peers: Vec<Arc<Peer>> = self
             .peers
-            .read()
-            .iter()
-            .map(|(_, peer)| peer.clone())
+            .read().values().cloned()
             .collect();
 
         for peer in peers {
