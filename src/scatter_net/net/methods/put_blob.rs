@@ -15,7 +15,7 @@ use ps_hash::Hash;
 use ps_hkey::{Hkey, LongHkeyExpanded};
 use ps_promise::{Promise, PromiseRejection};
 
-use crate::{Peer, PeerGroup, PeerPutBlobError, PutResponse, ScatterNet};
+use crate::{AsyncStoreError, Peer, PeerGroup, PeerPutBlobError, PutResponse, ScatterNet};
 
 use super::{ScatterNetPutEncrypted, ScatterNetPutRaw};
 
@@ -204,22 +204,14 @@ impl ScatterNetPutBlob {
         let net_clone = net.clone();
 
         let future = async move {
-            let hkey = LongHkeyExpanded::from_blob_async::<ScatterNetPutBlobError, _, _, _>(
-                &|data: &[u8]| {
-                    let net = net_clone.clone();
-                    let bytes = Bytes::copy_from_slice(data);
-                    async move { net.put_blob(bytes)?.early_return().await }
-                },
+            let hkey = LongHkeyExpanded::from_blob_async::<_, ScatterNetPutBlobError, _, _>(
+                &*net_clone,
                 &blob,
             )
             .await?;
 
             let hkey = hkey
-                .shrink_async::<ScatterNetPutBlobError, _, _, _>(&|data: &[u8]| {
-                    let net = net_clone.clone();
-                    let bytes = Bytes::copy_from_slice(data);
-                    async move { net.put_blob(bytes)?.await }
-                })
+                .shrink_async::<_, ScatterNetPutBlobError, _, _>(&*net_clone)
                 .await?;
 
             Ok(hkey)
@@ -314,12 +306,7 @@ impl ScatterNetPutBlob {
 
                         Ok(Some(hkey))
                     }
-                    Err(err) => match err {
-                        PromiseRejection::Err(err) => Err(err),
-                        PromiseRejection::PromiseConsumedAlready => {
-                            Err(ScatterNetPutBlobError::Promise)
-                        }
-                    },
+                    Err(err) => Err(err),
                 }
             } else {
                 Ok(None)
@@ -360,6 +347,8 @@ impl Future for ScatterNetPutBlob {
 #[derive(thiserror::Error, Debug)]
 pub enum ScatterNetPutBlobError {
     #[error(transparent)]
+    AsyncStore(Box<AsyncStoreError>),
+    #[error(transparent)]
     Buffer(#[from] ps_buffer::BufferError),
     #[error(transparent)]
     Hash(#[from] ps_hash::HashError),
@@ -367,8 +356,8 @@ pub enum ScatterNetPutBlobError {
     Hkey(#[from] ps_hkey::PsHkeyError),
     #[error(transparent)]
     Lake(#[from] ps_datalake::error::PsDataLakeError),
-    #[error("Internal Promise error.")]
-    Promise,
+    #[error("Promise consumed more than once")]
+    PromiseAlreadyConsumed,
     #[error(transparent)]
     PutEncrypted(#[from] crate::ScatterNetPutEncryptedError),
     #[error(transparent)]
@@ -376,6 +365,18 @@ pub enum ScatterNetPutBlobError {
 }
 
 type Result<T = ScatterNetPutBlob, E = ScatterNetPutBlobError> = std::result::Result<T, E>;
+
+impl From<AsyncStoreError> for ScatterNetPutBlobError {
+    fn from(value: AsyncStoreError) -> Self {
+        Self::AsyncStore(Box::new(value))
+    }
+}
+
+impl PromiseRejection for ScatterNetPutBlobError {
+    fn already_consumed() -> Self {
+        Self::PromiseAlreadyConsumed
+    }
+}
 
 #[must_use = "This Future doesn't do anything unless polled or awaited."]
 pub struct ScatterNetPutBlobEarlyReturn {

@@ -8,6 +8,7 @@ use std::{
 
 use bytes::Bytes;
 use n0_future::{FutureExt, StreamExt};
+use ps_promise::PromiseRejection;
 
 use crate::{spawn_and_forget, Interaction, Packet, Peer, PutRequest, PutResponse};
 
@@ -191,6 +192,8 @@ impl Future for PeerPutBlob {
 pub enum PeerPutBlobError {
     #[error(transparent)]
     BeginInteraction(#[from] crate::PeerBeginInteractionError),
+    #[error("This Promise was consumed more than once.")]
+    ConsumedAlready,
     #[error("Peer did not respond to the put request.")]
     DidNotRespond,
     #[error("Peer did not provide a valid response.")]
@@ -203,6 +206,12 @@ pub enum PeerPutBlobError {
     ReadPacket(#[from] crate::InteractionReadPacketError),
     #[error(transparent)]
     SendPacket(#[from] crate::InteractionSendPacketError),
+}
+
+impl PromiseRejection for PeerPutBlobError {
+    fn already_consumed() -> Self {
+        Self::ConsumedAlready
+    }
 }
 
 type Result<T = PutResponse, E = PeerPutBlobError> = std::result::Result<T, E>;

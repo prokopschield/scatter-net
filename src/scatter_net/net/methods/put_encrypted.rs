@@ -6,7 +6,7 @@ use ps_buffer::{SharedBuffer, ToSharedBuffer};
 use ps_datachunk::OwnedDataChunk;
 use ps_hash::Hash;
 use ps_hkey::Hkey;
-use ps_promise::{Promise, Transformer};
+use ps_promise::{Promise, PromiseRejection, Transformer};
 
 use crate::{Peer, PeerGroup, PeerPutBlobError, PutResponse, ScatterNet};
 
@@ -205,10 +205,18 @@ pub enum ScatterNetPutEncryptedError {
 
 #[derive(thiserror::Error, Debug)]
 enum PutResponseInternalError {
+    #[error("This Promise was consumed already")]
+    ConsumedAlready,
     #[error("Failed")]
     Failure,
     #[error("LimitExceeded")]
     LimitExceeded,
     #[error(transparent)]
     PeerPutBlobError(#[from] PeerPutBlobError),
+}
+
+impl PromiseRejection for PutResponseInternalError {
+    fn already_consumed() -> Self {
+        Self::ConsumedAlready
+    }
 }

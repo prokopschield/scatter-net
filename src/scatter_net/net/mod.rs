@@ -6,6 +6,7 @@ mod types;
 use std::{collections::HashMap, sync::Arc};
 
 pub use config::*;
+pub use implementations::*;
 use iroh::{Endpoint, NodeId};
 pub use methods::*;
 use parking_lot::RwLock;
