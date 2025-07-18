@@ -2,11 +2,13 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use iroh::Endpoint;
-use parking_lot::lock_api::RwLock;
 use ps_datalake::lake::DataLake;
 use tokio::spawn;
 
-use crate::{spawn_and_forget, NetConfig, NetState, ScatterNet, ALPN};
+use crate::{
+    spawn_and_forget, NetConfig, NetState, ScatterNet, ScatterNetInnerReadonly,
+    ScatterNetInnerWritable, ALPN,
+};
 
 impl ScatterNet {
     /// Initializes a [`ScatterNet`] instance.
@@ -30,16 +32,21 @@ impl ScatterNet {
 
         eprintln!("Initialized node {node_id}");
 
-        let net = Self {
-            config: config.clone(),
+        let lake = DataLake::init(config.lake_config.clone())?;
+
+        let readonly = ScatterNetInnerReadonly {
+            config,
             endpoint,
-            lake: Arc::new(DataLake::init(config.lake_config)?),
+            lake,
             node_id,
-            peer_groups: Arc::default(),
-            peers: Arc::default(),
-            put_cache: Arc::default(),
-            state: Arc::from(RwLock::new(state)),
         };
+
+        let writable = ScatterNetInnerWritable {
+            state,
+            ..Default::default()
+        };
+
+        let net = Self::from_inner(readonly, writable);
 
         let net = Arc::new(net);
 

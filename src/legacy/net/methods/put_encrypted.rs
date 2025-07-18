@@ -28,7 +28,7 @@ impl ScatterNet {
     }
 }
 
-// TODO #[derive(Debug)]
+#[derive(Debug)]
 pub enum ScatterNetPutEncrypted {
     Initial {
         buffer: SharedBuffer,
@@ -84,8 +84,8 @@ impl Future for ScatterNetPutEncrypted {
                         hash,
                         hkey,
                         targets: net
-                            .peer_groups
                             .read()
+                            .peer_groups
                             .iter()
                             .map(|peer_group| Target {
                                 hkey: None,

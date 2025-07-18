@@ -3,7 +3,7 @@ mod methods;
 
 use std::sync::Arc;
 
-use super::ScatterNet;
+use crate::ScatterNet;
 
 #[derive(Clone, Debug)]
 pub struct ScatterNetProtocol {

@@ -12,9 +12,9 @@ impl ScatterNet {
         state: Option<PeerState>,
     ) -> Result<Arc<Peer>> {
         let node_id = connection.remote_node_id()?;
-        let mut peers_guard = self.peers.write();
+        let mut guard = self.write();
 
-        if let Some(peer) = peers_guard.get(&node_id) {
+        if let Some(peer) = guard.peers.get(&node_id) {
             peer.replace_connection(connection)?;
 
             return Ok(peer.clone());
@@ -22,9 +22,9 @@ impl ScatterNet {
 
         let peer = Peer::init(self.clone(), connection, state)?;
 
-        peers_guard.insert(node_id, peer.clone());
+        guard.peers.insert(node_id, peer.clone());
 
-        drop(peers_guard);
+        drop(guard);
 
         spawn_and_forget({
             let peer = peer.clone();

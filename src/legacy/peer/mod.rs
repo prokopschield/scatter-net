@@ -9,7 +9,7 @@ pub use methods::*;
 use parking_lot::RwLock;
 pub use types::*;
 
-use super::ScatterNet;
+use crate::ScatterNet;
 
 #[derive(Debug)]
 pub struct Peer {

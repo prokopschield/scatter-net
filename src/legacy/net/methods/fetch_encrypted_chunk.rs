@@ -52,7 +52,7 @@ impl<'lt> ScatterNetFetchEncryptedChunk<'lt> {
         };
 
         let peer_groups = match &locally_found {
-            None => net.peer_groups.read().clone().into(),
+            None => net.read().peer_groups.clone().into(),
             Some(_) => VecDeque::new(),
         };
 
@@ -138,11 +138,7 @@ impl Future for ScatterNetFetchEncryptedChunk<'_> {
                 return Ready(Err(ScatterNetFetchEncryptedChunkError::NotFound));
             }
 
-            let peers: Vec<Arc<Peer>> = this
-                .net
-                .peers
-                .read().values().cloned()
-                .collect();
+            let peers: Vec<Arc<Peer>> = this.net.read().peers.values().cloned().collect();
 
             for peer in peers {
                 request_from_peer(peer, hash.clone());

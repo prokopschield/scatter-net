@@ -13,16 +13,13 @@ where
         let error_code = error_code.into();
         let reason = reason.as_ref();
 
-        let peer_groups = self.peer_groups.read().clone();
+        let peer_groups = self.read().peer_groups.clone();
 
         for peer_group in peer_groups {
             PeerGroup::terminate(&peer_group, error_code, &reason);
         }
 
-        let peers: Vec<Arc<Peer>> = self
-            .peers
-            .read().values().cloned()
-            .collect();
+        let peers: Vec<Arc<Peer>> = self.read().peers.values().cloned().collect();
 
         for peer in peers {
             Peer::terminate(&peer, error_code, &reason);

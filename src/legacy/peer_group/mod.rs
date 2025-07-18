@@ -8,7 +8,7 @@ use iroh::NodeId;
 use parking_lot::RwLock;
 pub use types::*;
 
-use super::{peer::Peer, ScatterNet};
+use crate::{Peer, ScatterNet};
 
 #[derive(Clone, Debug)]
 pub struct PeerGroup {

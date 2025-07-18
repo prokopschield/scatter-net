@@ -23,13 +23,13 @@ impl ScatterNet {
     pub fn put_blob(self: &Arc<Self>, blob: Bytes) -> Result {
         let hash = Arc::new(Hash::hash(&blob)?);
 
-        if let Some(from_cache) = self.put_cache.read().get(&hash) {
+        if let Some(from_cache) = self.read().put_cache.get(&hash) {
             return Ok(from_cache.clone());
         }
 
         let future = ScatterNetPutBlob::new(blob, hash.clone(), self.clone())?;
 
-        self.put_cache.write().insert(hash, future.clone());
+        self.write().put_cache.insert(hash, future.clone());
 
         future.background();
 
@@ -37,6 +37,7 @@ impl ScatterNet {
     }
 }
 
+#[derive(Debug)]
 pub struct ScatterNetPutBlobInner {
     pub blob: RwLock<Option<Bytes>>,
     pub hash: Arc<Hash>,
@@ -49,12 +50,14 @@ pub struct Part {
     pub future: Pin<Box<ScatterNetPutBlob>>,
 }
 
+#[derive(Debug)]
 pub struct Put {
     pub future: Option<Promise<PutResponse, PeerPutBlobError>>,
     pub peer: Option<Arc<Peer>>,
     pub peer_group: Arc<PeerGroup>,
 }
 
+#[derive(Debug)]
 pub enum State {
     PutEncrypted(ScatterNetPutEncrypted),
     PutRaw(ScatterNetPutRaw),
@@ -62,7 +65,7 @@ pub enum State {
     Split(Promise<Hkey, ScatterNetPutBlobError>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ScatterNetPutBlob {
     inner: Arc<ScatterNetPutBlobInner>,
 }
@@ -175,8 +178,8 @@ impl ScatterNetPutBlob {
             .unwrap_or_else(|_| hash.clone().into());
 
         let puts: Vec<Put> = net
-            .peer_groups
             .read()
+            .peer_groups
             .iter()
             .map(|group| Put {
                 future: None,

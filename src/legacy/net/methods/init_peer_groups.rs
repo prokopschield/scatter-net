@@ -58,10 +58,10 @@ impl ScatterNet {
             .map(|config| PeerGroup::init(self.clone(), config))
             .collect();
 
-        let mut guard = self.peer_groups.write();
+        let mut guard = self.write();
 
         for peer_group in peer_groups? {
-            guard.push(peer_group);
+            guard.peer_groups.push(peer_group);
         }
 
         drop(guard);
