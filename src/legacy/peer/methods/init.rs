@@ -8,7 +8,7 @@ use crate::{legacy::peer::PeerState, Peer, PeerUsage, ScatterNet};
 
 impl Peer {
     pub fn init(
-        net: Arc<ScatterNet>,
+        net: ScatterNet,
         connection: Connection,
         state: Option<PeerState>,
     ) -> Result<Arc<Self>> {

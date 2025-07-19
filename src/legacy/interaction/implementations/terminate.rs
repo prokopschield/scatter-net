@@ -7,7 +7,7 @@ where
     E: Into<VarInt> + Send,
     R: AsRef<[u8]> + Send,
 {
-    fn terminate(self: &std::sync::Arc<Self>, error_code: E, _reason: &R) {
+    fn terminate(&self, error_code: E, _reason: &R) {
         let interaction = self.clone();
         let error_code = error_code.into();
 

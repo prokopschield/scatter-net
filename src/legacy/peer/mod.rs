@@ -14,7 +14,7 @@ use crate::ScatterNet;
 #[derive(Debug)]
 pub struct Peer {
     connection: RwLock<Connection>,
-    net: Arc<ScatterNet>,
+    net: ScatterNet,
     node_id: NodeId,
     state: Arc<RwLock<PeerState>>,
 }

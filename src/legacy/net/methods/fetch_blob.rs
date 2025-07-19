@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use anyhow::{Error, Result};
 use ps_buffer::{SharedBuffer, ToSharedBuffer};
 use ps_datachunk::{PsDataChunkError, SerializedDataChunk};
@@ -8,9 +6,9 @@ use ps_hkey::{Hkey, PsHkeyError};
 use crate::{AsyncStoreError, ScatterNet};
 
 impl ScatterNet {
-    pub async fn fetch_blob(self: Arc<Self>, hkey: &Hkey) -> Result<SharedBuffer> {
+    pub async fn fetch_blob(self, hkey: &Hkey) -> Result<SharedBuffer> {
         let buffer = hkey
-            .resolve_async::<SerializedDataChunk, Error, AsyncStoreError, Self>(&*self)
+            .resolve_async::<SerializedDataChunk, Error, AsyncStoreError, Self>(&self)
             .await?
             .data_ref()
             .to_shared_buffer()?;

@@ -13,6 +13,6 @@ use crate::{Peer, ScatterNet};
 #[derive(Clone, Debug)]
 pub struct PeerGroup {
     config: PeerGroupConfig,
-    net: Arc<ScatterNet>,
+    net: ScatterNet,
     peers: Arc<RwLock<HashMap<NodeId, Arc<Peer>>>>,
 }

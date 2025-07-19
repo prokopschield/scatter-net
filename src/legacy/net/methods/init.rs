@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use anyhow::Result;
 use iroh::Endpoint;
 use ps_datalake::lake::DataLake;
@@ -14,7 +12,7 @@ impl ScatterNet {
     /// Initializes a [`ScatterNet`] instance.
     /// # Errors
     /// An Error is returned if binding the socket fails.
-    pub async fn init(config: NetConfig, state: NetState) -> Result<Arc<Self>> {
+    pub async fn init(config: NetConfig, state: NetState) -> Result<Self> {
         let mut builder = Endpoint::builder()
             .alpns(vec![ALPN.to_vec()])
             .discovery_dht()
@@ -47,8 +45,6 @@ impl ScatterNet {
         };
 
         let net = Self::from_inner(readonly, writable);
-
-        let net = Arc::new(net);
 
         spawn(Self::accept_loop(net.clone()));
 

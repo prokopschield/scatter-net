@@ -1,4 +1,4 @@
-use std::{future::Future, sync::Arc};
+use std::future::Future;
 
 use ps_hkey::Hkey;
 
@@ -6,7 +6,7 @@ use crate::ScatterNet;
 
 impl ScatterNet {
     pub fn put_raw<D: AsRef<[u8]>>(
-        self: Arc<Self>,
+        self,
         data: D,
     ) -> Result<ScatterNetPutRaw, ScatterNetPutRawError> {
         let data = data.as_ref();

@@ -14,7 +14,7 @@ impl ScatterNet {
     /// `chunk` should be backed by a smart pointer that is cheap to clone, e.g. `Arc<[u8]>` or `SharedBuffer`
     #[must_use = "Futures don't do anything unless awaited or polled."]
     pub fn put_encrypted<D: AsRef<[u8]>>(
-        self: Arc<Self>,
+        self,
         data: D,
     ) -> Result<ScatterNetPutEncrypted, ScatterNetPutEncryptedError> {
         let buffer = data.as_ref().to_shared_buffer()?;
@@ -33,7 +33,7 @@ pub enum ScatterNetPutEncrypted {
     Initial {
         buffer: SharedBuffer,
         hash: Arc<Hash>,
-        net: Arc<ScatterNet>,
+        net: ScatterNet,
     },
     Sending {
         buffer: SharedBuffer,

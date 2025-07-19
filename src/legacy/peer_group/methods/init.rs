@@ -5,7 +5,7 @@ use anyhow::Result;
 use crate::{PeerGroup, PeerGroupConfig, ScatterNet};
 
 impl PeerGroup {
-    pub fn init(net: Arc<ScatterNet>, config: PeerGroupConfig) -> Result<Arc<Self>> {
+    pub fn init(net: ScatterNet, config: PeerGroupConfig) -> Result<Arc<Self>> {
         let peer_group = Self {
             config,
             net,

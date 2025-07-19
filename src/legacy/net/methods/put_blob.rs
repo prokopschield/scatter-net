@@ -20,7 +20,7 @@ use crate::{AsyncStoreError, Peer, PeerGroup, PeerPutBlobError, PutResponse, Sca
 use super::{ScatterNetPutEncrypted, ScatterNetPutRaw};
 
 impl ScatterNet {
-    pub fn put_blob(self: &Arc<Self>, blob: Bytes) -> Result {
+    pub fn put_blob(&self, blob: Bytes) -> Result {
         let hash = Arc::new(Hash::hash(&blob)?);
 
         if let Some(from_cache) = self.read().put_cache.get(&hash) {
@@ -42,7 +42,7 @@ pub struct ScatterNetPutBlobInner {
     pub blob: RwLock<Option<Bytes>>,
     pub hash: Arc<Hash>,
     pub hkey: RwLock<Option<Hkey>>,
-    pub net: Arc<ScatterNet>,
+    pub net: ScatterNet,
     pub state: RwLock<State>,
 }
 
@@ -99,7 +99,7 @@ impl ScatterNetPutBlob {
     }
 
     #[inline]
-    pub fn new(blob: Bytes, hash: Arc<Hash>, net: Arc<ScatterNet>) -> Result {
+    pub fn new(blob: Bytes, hash: Arc<Hash>, net: ScatterNet) -> Result {
         // chunk + deflate + poly1305 + RS(255,231)
         // 4096 B + 5 B + 16 B + 496 B = 4613 B
         if blob.len() > 4613 {
@@ -126,7 +126,7 @@ impl ScatterNetPutBlob {
         Self::new_put_raw(blob, hash, net)
     }
 
-    pub fn new_put_encrypted(blob: Bytes, hash: Arc<Hash>, net: Arc<ScatterNet>) -> Result {
+    pub fn new_put_encrypted(blob: Bytes, hash: Arc<Hash>, net: ScatterNet) -> Result {
         let chunk = BorrowedDataChunk::from_parts(&blob, hash.clone());
         let hkey = net
             .lake
@@ -148,7 +148,7 @@ impl ScatterNetPutBlob {
         })
     }
 
-    pub fn new_put_raw(blob: Bytes, hash: Arc<Hash>, net: Arc<ScatterNet>) -> Result {
+    pub fn new_put_raw(blob: Bytes, hash: Arc<Hash>, net: ScatterNet) -> Result {
         let chunk = BorrowedDataChunk::from_parts(&blob, hash.clone());
         let hkey = net
             .lake
@@ -170,7 +170,7 @@ impl ScatterNetPutBlob {
         })
     }
 
-    pub fn new_put(blob: Bytes, hash: Arc<Hash>, net: Arc<ScatterNet>) -> Result {
+    pub fn new_put(blob: Bytes, hash: Arc<Hash>, net: ScatterNet) -> Result {
         let chunk = BorrowedDataChunk::from_parts(&blob, hash.clone());
         let hkey = net
             .lake
@@ -201,20 +201,19 @@ impl ScatterNetPutBlob {
         })
     }
 
-    pub fn new_split(blob: Bytes, hash: Arc<Hash>, net: Arc<ScatterNet>) -> Result {
+    pub fn new_split(blob: Bytes, hash: Arc<Hash>, net: ScatterNet) -> Result {
         let hkey = net.lake.put_blob(&blob).ok();
 
         let net_clone = net.clone();
 
         let future = async move {
             let hkey = LongHkeyExpanded::from_blob_async::<_, ScatterNetPutBlobError, _, _>(
-                &*net_clone,
-                &blob,
+                &net_clone, &blob,
             )
             .await?;
 
             let hkey = hkey
-                .shrink_async::<_, ScatterNetPutBlobError, _, _>(&*net_clone)
+                .shrink_async::<_, ScatterNetPutBlobError, _, _>(&net_clone)
                 .await?;
 
             Ok(hkey)

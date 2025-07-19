@@ -6,11 +6,7 @@ use iroh::NodeId;
 use crate::{Peer, PeerState, ScatterNet, ALPN};
 
 impl ScatterNet {
-    pub async fn connect_to(
-        self: &Arc<Self>,
-        node_id: NodeId,
-        state: Option<PeerState>,
-    ) -> Result<Arc<Peer>> {
+    pub async fn connect_to(&self, node_id: NodeId, state: Option<PeerState>) -> Result<Arc<Peer>> {
         eprintln!("Attempting connection to {node_id}");
 
         let connection = self.endpoint.connect(node_id, ALPN).await?;

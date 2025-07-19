@@ -6,11 +6,7 @@ use iroh::endpoint::Connection;
 use crate::{spawn_and_forget, Peer, PeerState, ScatterNet};
 
 impl ScatterNet {
-    pub fn init_peer(
-        self: &Arc<Self>,
-        connection: Connection,
-        state: Option<PeerState>,
-    ) -> Result<Arc<Peer>> {
+    pub fn init_peer(&self, connection: Connection, state: Option<PeerState>) -> Result<Arc<Peer>> {
         let node_id = connection.remote_node_id()?;
         let mut guard = self.write();
 
