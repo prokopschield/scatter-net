@@ -1,11 +1,9 @@
-use std::sync::Arc;
-
 use anyhow::Result;
 
 use crate::{spawn_and_forget, Packet, Peer};
 
 impl Peer {
-    pub async fn listen_dg(self: Arc<Self>) -> Result<()> {
+    pub async fn listen_dg(self) -> Result<()> {
         let connection = self.read().connection.clone();
 
         loop {

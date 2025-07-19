@@ -14,5 +14,5 @@ use crate::{Peer, ScatterNet};
 pub struct PeerGroup {
     config: PeerGroupConfig,
     net: ScatterNet,
-    peers: Arc<RwLock<HashMap<NodeId, Arc<Peer>>>>,
+    peers: Arc<RwLock<HashMap<NodeId, Peer>>>,
 }

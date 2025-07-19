@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 
 use chrono::TimeDelta;
 use n0_future::StreamExt;
@@ -15,10 +15,7 @@ impl Peer {
     /// # Returns
     /// * `Ok(TimeDelta)` - Round-trip time
     /// * `Err(PeerPingError)` - Various failure modes
-    pub async fn ping(
-        self: Arc<Self>,
-        timeout_duration: Duration,
-    ) -> Result<TimeDelta, PeerPingError> {
+    pub async fn ping(self, timeout_duration: Duration) -> Result<TimeDelta, PeerPingError> {
         let mut interaction = self.begin_interaction().await?;
 
         let time_start = chrono::Local::now();

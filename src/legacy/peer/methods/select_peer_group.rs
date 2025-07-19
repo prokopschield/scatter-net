@@ -7,9 +7,7 @@ use crate::{ErrorCode, Peer, PeerGroup, Terminate};
 
 impl Peer {
     /// Inserts this [`Peer`] into a [`PeerGroup`], if it isn't in one already.
-    pub async fn select_peer_group(
-        self: Arc<Self>,
-    ) -> Result<Arc<PeerGroup>, PeerSelectPeerGroupError> {
+    pub async fn select_peer_group(self) -> Result<Arc<PeerGroup>, PeerSelectPeerGroupError> {
         sleep(Duration::from_secs(1)).await;
 
         let mut interaction = self.clone().begin_interaction().await?;

@@ -53,7 +53,7 @@ pub struct Part {
 #[derive(Debug)]
 pub struct Put {
     pub future: Option<Promise<PutResponse, PeerPutBlobError>>,
-    pub peer: Option<Arc<Peer>>,
+    pub peer: Option<Peer>,
     pub peer_group: Arc<PeerGroup>,
 }
 

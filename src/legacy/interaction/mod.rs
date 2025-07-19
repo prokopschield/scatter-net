@@ -13,7 +13,7 @@ use crate::{Packet, Peer};
 #[derive(Clone, Debug)]
 pub struct Interaction {
     buffer: Arc<RwLock<Buffer>>,
-    peer: Arc<Peer>,
+    peer: Peer,
     recv_stream: Arc<tokio::sync::Mutex<RecvStream>>,
     send_stream: Option<Arc<tokio::sync::Mutex<SendStream>>>,
     packets: Arc<parking_lot::Mutex<VecDeque<Packet>>>,

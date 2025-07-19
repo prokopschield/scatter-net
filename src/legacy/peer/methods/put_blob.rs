@@ -2,7 +2,6 @@ use std::{
     future::Future,
     mem::replace,
     pin::Pin,
-    sync::Arc,
     task::Poll::{Pending, Ready},
 };
 
@@ -13,7 +12,7 @@ use ps_promise::PromiseRejection;
 use crate::{spawn_and_forget, Interaction, Packet, Peer, PutRequest, PutResponse};
 
 impl Peer {
-    pub fn put_blob(self: Arc<Self>, data: Bytes) -> PeerPutBlob {
+    pub fn put_blob(self, data: Bytes) -> PeerPutBlob {
         PeerPutBlob {
             // Start in the BeginInteraction state
             state: PeerPutBlobState::BeginInteraction {

@@ -1,13 +1,9 @@
-use std::sync::Arc;
-
 use iroh::endpoint::ConnectionError;
 
 use crate::{Interaction, Peer};
 
 impl Peer {
-    pub async fn begin_interaction(
-        self: Arc<Self>,
-    ) -> Result<Interaction, PeerBeginInteractionError> {
+    pub async fn begin_interaction(self) -> Result<Interaction, PeerBeginInteractionError> {
         let connection = self.read().connection.clone();
         let channel = connection.open_bi().await?;
         let interaction = Interaction::init(self, channel.1, Some(channel.0));

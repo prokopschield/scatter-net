@@ -104,7 +104,7 @@ impl Future for ScatterNetFetchEncryptedChunk<'_> {
             return Ready(Ok(chunk));
         }
 
-        let mut request_from_peer = |peer: Arc<Peer>, hash: Arc<Hash>| {
+        let mut request_from_peer = |peer: Peer, hash: Arc<Hash>| {
             let mut future = Box::pin(async move {
                 let fetched = Peer::fetch_blob(peer, Hkey::Direct(hash), 1, false).await;
 
@@ -138,7 +138,7 @@ impl Future for ScatterNetFetchEncryptedChunk<'_> {
                 return Ready(Err(ScatterNetFetchEncryptedChunkError::NotFound));
             }
 
-            let peers: Vec<Arc<Peer>> = this.net.read().peers.values().cloned().collect();
+            let peers: Vec<Peer> = this.net.read().peers.values().cloned().collect();
 
             for peer in peers {
                 request_from_peer(peer, hash.clone());

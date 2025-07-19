@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use n0_future::StreamExt;
 use ps_hkey::Hkey;
 
@@ -7,7 +5,7 @@ use crate::{FetchRequest, FetchResponse, Packet, Peer};
 
 impl Peer {
     pub async fn fetch_blob(
-        self: Arc<Self>,
+        self,
         hkey: Hkey,
         level: u8,
         recursive: bool,

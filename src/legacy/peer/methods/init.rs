@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use anyhow::Result;
 use iroh::endpoint::Connection;
 
@@ -8,11 +6,7 @@ use crate::{
 };
 
 impl Peer {
-    pub fn init(
-        net: ScatterNet,
-        connection: Connection,
-        state: Option<PeerState>,
-    ) -> Result<Arc<Self>> {
+    pub fn init(net: ScatterNet, connection: Connection, state: Option<PeerState>) -> Result<Self> {
         let node_id = connection.remote_node_id()?;
 
         let mut state = state.unwrap_or_else(|| PeerState {
@@ -27,8 +21,6 @@ impl Peer {
             PeerInnerReadonly { net, node_id },
             PeerInnerWritable { connection, state },
         );
-
-        let peer = Arc::from(peer);
 
         peer.clone().listen();
 

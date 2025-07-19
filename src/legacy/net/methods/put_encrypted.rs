@@ -50,7 +50,7 @@ pub enum ScatterNetPutEncrypted {
 #[derive(Debug)]
 pub struct Target {
     hkey: Option<Hkey>,
-    peer: Option<Arc<Peer>>,
+    peer: Option<Peer>,
     peer_group: Arc<PeerGroup>,
     promise: Option<Promise<Hkey, PutResponseInternalError>>,
 }

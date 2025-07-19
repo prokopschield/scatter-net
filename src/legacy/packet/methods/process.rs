@@ -6,7 +6,7 @@ use ps_hash::Hash;
 use crate::{Packet, Peer};
 
 impl Packet {
-    pub async fn process(self, peer: Arc<Peer>) -> Result<Option<Self>, PacketProcessError> {
+    pub async fn process(self, peer: Peer) -> Result<Option<Self>, PacketProcessError> {
         use PacketProcessError::ReceivedErrorPacket;
 
         match self {

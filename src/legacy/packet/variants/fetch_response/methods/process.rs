@@ -1,11 +1,9 @@
-use std::sync::Arc;
-
 use ps_str::Utf8Encoder;
 
 use crate::{FetchResponse, Packet, PacketProcessError, Peer, ScatterNet};
 
 impl FetchResponse {
-    pub async fn process(self, peer: Arc<Peer>) -> Result<Option<Packet>, PacketProcessError> {
+    pub async fn process(self, peer: Peer) -> Result<Option<Packet>, PacketProcessError> {
         match self {
             Self::Error => {
                 eprintln!(

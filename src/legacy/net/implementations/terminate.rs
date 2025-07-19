@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use iroh::endpoint::VarInt;
 
 use crate::{Peer, PeerGroup, ScatterNet, Terminate};
@@ -19,7 +17,7 @@ where
             PeerGroup::terminate(&peer_group, error_code, &reason);
         }
 
-        let peers: Vec<Arc<Peer>> = self.read().peers.values().cloned().collect();
+        let peers: Vec<Peer> = self.read().peers.values().cloned().collect();
 
         for peer in peers {
             Peer::terminate(&peer, error_code, &reason);
