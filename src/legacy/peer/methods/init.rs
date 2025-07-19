@@ -2,9 +2,10 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use iroh::endpoint::Connection;
-use parking_lot::RwLock;
 
-use crate::{legacy::peer::PeerState, Peer, PeerUsage, ScatterNet};
+use crate::{
+    legacy::peer::PeerState, Peer, PeerInnerReadonly, PeerInnerWritable, PeerUsage, ScatterNet,
+};
 
 impl Peer {
     pub fn init(
@@ -22,12 +23,10 @@ impl Peer {
 
         state.terminated = false;
 
-        let peer = Self {
-            connection: RwLock::new(connection),
-            net,
-            node_id,
-            state: Arc::new(RwLock::new(state)),
-        };
+        let peer = Self::from_inner(
+            PeerInnerReadonly { net, node_id },
+            PeerInnerWritable { connection, state },
+        );
 
         let peer = Arc::from(peer);
 

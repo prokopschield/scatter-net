@@ -1,7 +1,8 @@
 use crate::Peer;
 
 impl Peer {
+    #[must_use]
     pub fn is_available(&self) -> bool {
-        !self.state.read().terminated
+        !self.read().state.terminated
     }
 }

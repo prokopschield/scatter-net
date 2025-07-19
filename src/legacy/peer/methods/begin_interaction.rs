@@ -8,7 +8,7 @@ impl Peer {
     pub async fn begin_interaction(
         self: Arc<Self>,
     ) -> Result<Interaction, PeerBeginInteractionError> {
-        let connection = self.connection.read().clone();
+        let connection = self.read().connection.clone();
         let channel = connection.open_bi().await?;
         let interaction = Interaction::init(self, channel.1, Some(channel.0));
 

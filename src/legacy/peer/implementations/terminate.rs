@@ -8,12 +8,12 @@ where
     R: AsRef<[u8]> + Send,
 {
     fn terminate(&self, error_code: E, reason: &R) {
-        self.connection
-            .read()
+        self.read()
+            .connection
             .close(error_code.into(), reason.as_ref());
 
-        let mut state = self.state.write();
+        let mut guard = self.write();
 
-        state.terminated = true;
+        guard.state.terminated = true;
     }
 }

@@ -22,7 +22,7 @@ impl Peer {
             });
         }
 
-        *self.connection.write() = connection;
+        self.write().connection = connection;
 
         eprintln!("Replaced connection for {}", self.node_id());
 

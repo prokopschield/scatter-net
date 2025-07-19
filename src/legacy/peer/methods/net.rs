@@ -1,7 +1,8 @@
 use crate::{Peer, ScatterNet};
 
 impl Peer {
-    pub const fn net(&self) -> &ScatterNet {
+    #[must_use]
+    pub fn net(&self) -> &ScatterNet {
         &self.net
     }
 }

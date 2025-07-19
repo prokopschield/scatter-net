@@ -6,7 +6,7 @@ use crate::{spawn_and_forget, Packet, Peer};
 
 impl Peer {
     pub async fn listen_dg(self: Arc<Self>) -> Result<()> {
-        let connection = self.connection.read().clone();
+        let connection = self.read().connection.clone();
 
         loop {
             let dg = connection.read_datagram().await?;
