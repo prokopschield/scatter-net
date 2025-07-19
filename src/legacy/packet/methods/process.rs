@@ -11,7 +11,7 @@ impl Packet {
 
         match self {
             Self::Empty | Self::Pong => Ok(None),
-            Self::Error => Err(ReceivedErrorPacket),
+            Self::Error(str) => Err(ReceivedErrorPacket(str)),
             Self::Ping => Ok(Some(Self::Pong)),
             Self::FetchRequest(request) => Ok(Some(
                 match peer
@@ -37,7 +37,7 @@ impl Packet {
             )),
             Self::PutResponse(response) => {
                 eprintln!("Received unsolicited PutResponse({response:?}) from {peer}");
-                Ok(Some(Self::Error))
+                Ok(Some(Self::Error("Unsolicited PutResponse.".to_string())))
             }
         }
     }
@@ -50,7 +50,7 @@ pub enum PacketProcessError {
     #[error(transparent)]
     Put(#[from] crate::ScatterNetPutBlobError),
     #[error("The Peer sent an Error packet.")]
-    ReceivedErrorPacket,
+    ReceivedErrorPacket(String),
     #[error(transparent)]
     Unknown(#[from] anyhow::Error),
 }

@@ -8,9 +8,7 @@ pub use methods::*;
 use parking_lot::RwLock;
 use ps_buffer::Buffer;
 
-use crate::Peer;
-
-use super::Packet;
+use crate::{Packet, Peer};
 
 #[derive(Clone, Debug)]
 pub struct Interaction {
