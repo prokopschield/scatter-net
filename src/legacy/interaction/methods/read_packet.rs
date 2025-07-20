@@ -11,7 +11,7 @@ impl Interaction {
     ) -> Result<InteractionReadPacketResult, InteractionReadPacketError> {
         use InteractionReadPacketResult::{NoMorePackets, NoPacketYet, ReceivedPacket};
 
-        let mut buffer = self.buffer.write();
+        let mut guard = self.write();
 
         let mut recv_stream_future = Box::pin(self.recv_stream.lock());
 
@@ -22,64 +22,64 @@ impl Interaction {
 
         drop(recv_stream_future);
 
-        let mut current_offset = buffer.len();
+        let mut current_offset = guard.buffer.len();
 
         let capacity = if current_offset >= 4 {
-            u32::from_le_bytes(buffer[0..4].try_into()?).try_into()?
+            u32::from_le_bytes(guard.buffer[0..4].try_into()?).try_into()?
         } else {
-            buffer.capacity().max(0x1000)
+            guard.buffer.capacity().max(0x1000)
         };
 
-        buffer.set_len(capacity)?;
+        guard.buffer.set_len(capacity)?;
 
-        match recv_stream.poll_read(cx, &mut buffer[current_offset..]) {
+        match recv_stream.poll_read(cx, &mut guard.buffer[current_offset..]) {
             Ready(Ok(num_bytes_read)) => {
                 current_offset += num_bytes_read;
 
                 if num_bytes_read == 0 {
                     // EOF - connection closed
-                    buffer.truncate(current_offset);
+                    guard.buffer.truncate(current_offset);
                     drop(recv_stream);
-                    drop(buffer);
+                    drop(guard);
                     return Ok(NoMorePackets);
                 }
             }
             Ready(Err(err)) => {
-                buffer.truncate(current_offset);
+                guard.buffer.truncate(current_offset);
                 return Err(err.into());
             }
             Pending => {
-                buffer.truncate(current_offset);
+                guard.buffer.truncate(current_offset);
                 return Ok(NoPacketYet);
             }
         }
 
         drop(recv_stream);
 
-        buffer.truncate(current_offset);
+        guard.buffer.truncate(current_offset);
 
         let expected_length = if current_offset >= 4 {
-            u32::from_le_bytes(buffer[0..4].try_into()?).try_into()?
+            u32::from_le_bytes(guard.buffer[0..4].try_into()?).try_into()?
         } else {
             0
         };
 
         if current_offset < expected_length {
-            drop(buffer);
+            drop(guard);
 
             // Likely returns [`Pending`]
             return self.read_packet(cx);
         }
 
-        let packet = Packet::from_bytes(&buffer[..expected_length])
+        let packet = Packet::from_bytes(&guard.buffer[..expected_length])
             .map_err(InteractionReadPacketError::PacketFromBytes)?;
 
         let remainder = current_offset - expected_length;
 
-        buffer.copy_within(expected_length..current_offset, 0);
-        buffer.truncate(remainder);
+        guard.buffer.copy_within(expected_length..current_offset, 0);
+        guard.buffer.truncate(remainder);
 
-        drop(buffer);
+        drop(guard);
 
         Ok(ReceivedPacket(packet))
     }
