@@ -14,7 +14,7 @@ use ps_buffer::BufferError;
 use crate::{Interaction, Packet, PacketFromNetBufferError};
 
 impl Interaction {
-    pub fn read_packet_new(&self, cx: &mut Context<'_>) -> InteractionReadPacketResult {
+    pub fn read_packet(&self, cx: &mut Context<'_>) -> InteractionReadPacketResult {
         let mut guard = self.write();
 
         let mut recv_stream = match Box::pin(self.recv_stream.lock()).poll(cx) {
