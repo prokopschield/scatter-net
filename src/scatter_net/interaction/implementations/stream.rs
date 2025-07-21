@@ -11,9 +11,7 @@ impl Stream for Interaction {
         self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Option<Self::Item>> {
-        let this = self.get_mut();
-
-        match this.read_packet(cx) {
+        match self.read_packet(cx) {
             Ok(InteractionReadPacket::EOF) => Ready(None),
             Ok(InteractionReadPacket::Packet(packet)) => Ready(Some(Ok(packet))),
             Ok(InteractionReadPacket::Waiting) => Pending,
