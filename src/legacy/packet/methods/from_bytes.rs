@@ -11,7 +11,7 @@ impl Packet {
         let bytes = bytes.as_ref();
 
         let size = bytes.get(4..8).unwrap_or(&[]).try_into()?;
-        let size = usize::try_from(u32::from_le_bytes(size))?;
+        let size = usize::try_from(u32::from_be_bytes(size))?;
 
         let bytes = decompress(&bytes[8..], size)?;
 

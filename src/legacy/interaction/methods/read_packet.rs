@@ -25,7 +25,7 @@ impl Interaction {
         let mut current_offset = guard.buffer.len();
 
         let capacity = if current_offset >= 4 {
-            u32::from_le_bytes(guard.buffer[0..4].try_into()?).try_into()?
+            u32::from_be_bytes(guard.buffer[0..4].try_into()?).try_into()?
         } else {
             guard.buffer.capacity().max(0x1000)
         };
@@ -59,7 +59,7 @@ impl Interaction {
         guard.buffer.truncate(current_offset);
 
         let expected_length = if current_offset >= 4 {
-            u32::from_le_bytes(guard.buffer[0..4].try_into()?).try_into()?
+            u32::from_be_bytes(guard.buffer[0..4].try_into()?).try_into()?
         } else {
             0
         };

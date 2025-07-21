@@ -19,8 +19,8 @@ impl Packet {
         let com_len = u32::try_from(com_len)?;
         let ser_len = u32::try_from(ser_len)?;
 
-        buffer[0..4].copy_from_slice(&com_len.to_le_bytes());
-        buffer[4..8].copy_from_slice(&ser_len.to_le_bytes());
+        buffer[0..4].copy_from_slice(&com_len.to_be_bytes());
+        buffer[4..8].copy_from_slice(&ser_len.to_be_bytes());
 
         let bytes = Bytes::from_owner(buffer.share());
 
