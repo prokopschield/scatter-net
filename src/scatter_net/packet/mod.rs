@@ -1,5 +1,6 @@
 mod methods;
 
+pub use methods::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{FetchRequest, FetchResponse, PutRequest, PutResponse};
