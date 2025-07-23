@@ -106,7 +106,7 @@ impl Future for ScatterNetFetchEncryptedChunk<'_> {
 
         let mut request_from_peer = |peer: Peer, hash: Arc<Hash>| {
             let mut future = Box::pin(async move {
-                let fetched = Peer::fetch_blob(peer, Hkey::Direct(hash), 1, false).await;
+                let fetched = Peer::fetch_blob(peer, Hkey::Direct(hash)).await;
 
                 match fetched {
                     Ok(Some(FetchResponse::Success(buffer))) => {

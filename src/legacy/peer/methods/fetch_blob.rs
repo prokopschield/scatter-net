@@ -4,18 +4,11 @@ use ps_hkey::Hkey;
 use crate::{FetchRequest, FetchResponse, Packet, Peer};
 
 impl Peer {
-    pub async fn fetch_blob(
-        self,
-        hkey: Hkey,
-        level: u8,
-        recursive: bool,
-    ) -> Result<Option<FetchResponse>, PeerFetchBlobError> {
+    pub async fn fetch_blob(self, hkey: Hkey) -> Result<Option<FetchResponse>, PeerFetchBlobError> {
         let mut interaction = Self::begin_interaction(self.clone()).await?;
 
         let request = FetchRequest {
             hash: hkey.to_string(),
-            level,
-            recursive,
         };
 
         let packet = Packet::FetchRequest(request);
