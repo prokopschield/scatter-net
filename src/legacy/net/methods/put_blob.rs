@@ -207,14 +207,9 @@ impl ScatterNetPutBlob {
         let net_clone = net.clone();
 
         let future = async move {
-            let hkey = LongHkeyExpanded::from_blob_async::<_, ScatterNetPutBlobError, _, _>(
-                &net_clone, &blob,
-            )
-            .await?;
+            let hkey = LongHkeyExpanded::from_blob_async(&net_clone, &blob).await?;
 
-            let hkey = hkey
-                .shrink_async::<_, ScatterNetPutBlobError, _, _>(&net_clone)
-                .await?;
+            let hkey = hkey.shrink_async(&net_clone).await?;
 
             Ok(hkey)
         };
