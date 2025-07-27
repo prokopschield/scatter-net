@@ -5,9 +5,9 @@ use crate::{FetchResponse, Packet, PacketProcessError, Peer, ScatterNet};
 impl FetchResponse {
     pub async fn process(self, peer: Peer) -> Result<Option<Packet>, PacketProcessError> {
         match self {
-            Self::Error => {
+            Self::Error(err) => {
                 eprintln!(
-                    "Received spurious FetchResponse::Error from {}",
+                    "Received spurious FetchResponse::Error from {}: {err}",
                     peer.node_id()
                 );
             }

@@ -25,7 +25,7 @@ impl Packet {
                     Err(crate::ScatterNetFetchEncryptedChunkError::NotFound) => {
                         Self::FetchResponse(crate::FetchResponse::NotFound)
                     }
-                    Err(_) => Self::FetchResponse(crate::FetchResponse::Error),
+                    Err(err) => Self::FetchResponse(crate::FetchResponse::Error(err.to_string())),
                 },
             )),
             Self::FetchResponse(response) => response.process(peer).await,
