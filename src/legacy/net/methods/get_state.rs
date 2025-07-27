@@ -7,7 +7,7 @@ impl ScatterNet {
     pub fn get_state(&self) -> Result<NetState> {
         let peers: Vec<Peer> = self.read().peers.values().cloned().collect();
 
-        let peers: Vec<PeerState> = peers.iter().map(|peer| peer.get_state()).collect();
+        let peers: Vec<PeerState> = peers.iter().map(Peer::get_state).collect();
 
         let mut guard = self.write();
         let state = &mut guard.state;

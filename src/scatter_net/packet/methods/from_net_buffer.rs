@@ -45,7 +45,7 @@ mod tests {
         let packet = Packet::Pong;
         let serialized = packet.to_bytes()?;
 
-        let mut buffer = Buffer::alloc_uninit(200000)?;
+        let mut buffer = Buffer::alloc_uninit(200_000)?;
 
         buffer[0..serialized.len()].copy_from_slice(&serialized);
 

@@ -44,14 +44,18 @@ impl Interaction {
                 Pending => {
                     guard.buffer.truncate(current_offset);
 
-                    return match guard.packets.pop_front() {
-                        Some(packet) => Ok(InteractionReadPacket::Packet(packet)),
-                        None => Ok(InteractionReadPacket::Waiting),
-                    };
+                    drop(recv_stream);
+
+                    return guard.packets.pop_front().map_or_else(
+                        || Ok(InteractionReadPacket::Waiting),
+                        |packet| Ok(InteractionReadPacket::Packet(packet)),
+                    );
                 }
 
                 Ready(Err(err)) => {
                     guard.buffer.truncate(current_offset);
+
+                    drop(recv_stream);
 
                     return match guard.packets.pop_front() {
                         Some(packet) => Ok(InteractionReadPacket::Packet(packet)),
@@ -71,10 +75,10 @@ impl Interaction {
                     }
 
                     if bytes_read == 0 {
-                        return match guard.packets.pop_front() {
-                            Some(packet) => Ok(InteractionReadPacket::Packet(packet)),
-                            None => Ok(InteractionReadPacket::EOF),
-                        };
+                        return guard.packets.pop_front().map_or_else(
+                            || Ok(InteractionReadPacket::EOF),
+                            |packet| Ok(InteractionReadPacket::Packet(packet)),
+                        );
                     }
                 }
             }
