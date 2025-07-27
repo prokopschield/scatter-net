@@ -21,7 +21,10 @@ impl AsyncStore for ScatterNet {
         let net = self.clone();
         let chunk = chunk.into_owned();
 
-        Promise::new(async move { net.put_encrypted(chunk.data_ref())?.await?;Ok(()) })
+        Promise::new(async move {
+            net.put_encrypted(chunk.data_ref())?.await?;
+            Ok(())
+        })
     }
 }
 

@@ -12,6 +12,7 @@ pub struct PeerUsage {
     pub our_reputation_score: isize,
 }
 
+#[allow(clippy::missing_const_for_fn)]
 impl PeerUsage {
     pub fn inc_sent_fetch_success(&mut self) {
         self.sent_fetch_success += 1;
