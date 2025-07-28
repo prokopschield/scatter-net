@@ -1,4 +1,7 @@
-use iroh::{endpoint::Connection, NodeId};
+use iroh::{
+    endpoint::{Connection, RemoteNodeIdError},
+    NodeId,
+};
 
 use crate::Peer;
 
@@ -38,5 +41,5 @@ pub enum PeerReplaceConnectionError {
         own_node_id: NodeId,
     },
     #[error(transparent)]
-    ReadingNodeIdFailed(anyhow::Error),
+    ReadingNodeIdFailed(#[from] RemoteNodeIdError),
 }
