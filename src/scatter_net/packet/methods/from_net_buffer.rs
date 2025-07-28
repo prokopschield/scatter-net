@@ -11,8 +11,6 @@ impl Packet {
 
         let length = usize::try_from(u32::from_be_bytes(bytes[0..4].try_into()?))?;
 
-        eprintln!("{length}");
-
         if bytes.len() < length {
             return Ok(None);
         }
