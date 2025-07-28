@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 
 use n0_future::StreamExt;
 use tokio::time::sleep;
@@ -7,7 +7,7 @@ use crate::{ErrorCode, Peer, PeerGroup, Terminate};
 
 impl Peer {
     /// Inserts this [`Peer`] into a [`PeerGroup`], if it isn't in one already.
-    pub async fn select_peer_group(self) -> Result<Arc<PeerGroup>, PeerSelectPeerGroupError> {
+    pub async fn select_peer_group(self) -> Result<PeerGroup, PeerSelectPeerGroupError> {
         sleep(Duration::from_secs(1)).await;
 
         let mut interaction = self.clone().begin_interaction().await?;
@@ -31,7 +31,7 @@ impl Peer {
 
         let rtt = (time_end - time_start).num_milliseconds().unsigned_abs();
 
-        let mut peer_group: Option<Arc<crate::PeerGroup>> = None;
+        let mut peer_group: Option<crate::PeerGroup> = None;
 
         for g in self.net().get_peer_groups() {
             if g.has_peer(&self) {

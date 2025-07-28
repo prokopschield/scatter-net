@@ -34,7 +34,7 @@ pub struct ScatterNetFetchEncryptedChunk<'lt> {
     futures: RwLock<Vec<BoxedSerializedDataChunkFuture>>,
     net: &'lt ScatterNet,
     hash: Arc<Hash>,
-    peer_groups: VecDeque<Arc<PeerGroup>>,
+    peer_groups: VecDeque<PeerGroup>,
     value: Option<SerializedDataChunk>,
     timeout: Option<JoinHandle<()>>,
     num_attempts_all_peers: u8,

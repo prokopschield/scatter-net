@@ -54,7 +54,7 @@ pub struct Part {
 pub struct Put {
     pub future: Option<Promise<PutResponse, PeerPutBlobError>>,
     pub peer: Option<Peer>,
-    pub peer_group: Arc<PeerGroup>,
+    pub peer_group: PeerGroup,
 }
 
 #[derive(Debug)]

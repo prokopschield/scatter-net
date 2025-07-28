@@ -11,7 +11,7 @@ where
         let error_code = error_code.into();
         let reason = reason.as_ref();
 
-        let peers: Vec<Peer> = self.peers.read().values().cloned().collect();
+        let peers: Vec<Peer> = self.read().peers.values().cloned().collect();
 
         for peer in peers {
             peer.terminate(error_code, &reason);

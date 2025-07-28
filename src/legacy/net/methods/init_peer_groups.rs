@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use anyhow::Result;
 
 use crate::{PeerGroup, PeerGroupConfig, ScatterNet};
@@ -53,7 +51,7 @@ impl ScatterNet {
             ]);
         }
 
-        let peer_groups: Result<Vec<Arc<PeerGroup>>> = configs
+        let peer_groups: Result<Vec<PeerGroup>> = configs
             .into_iter()
             .map(|config| PeerGroup::init(self.clone(), config))
             .collect();

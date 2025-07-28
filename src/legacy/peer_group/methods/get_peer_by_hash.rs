@@ -8,7 +8,7 @@ impl PeerGroup {
         let mut sel_distance = u64::MAX;
         let mut selected = None;
 
-        self.peers.read().iter().for_each(|(node_id, peer)| {
+        self.read().peers.iter().for_each(|(node_id, peer)| {
             if !peer.is_available() {
                 return;
             }
