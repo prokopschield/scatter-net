@@ -1,9 +1,9 @@
-use crate::{ErrorCode, Peer};
+use crate::{ErrorCode, PeerInnerWritable};
 
-impl Drop for Peer {
+impl Drop for PeerInnerWritable {
     fn drop(&mut self) {
         let error_code = (ErrorCode::PeerDropped as u8).into();
 
-        self.read().connection.close(error_code, b"Peer dropped.");
+        self.connection.close(error_code, b"Peer dropped.");
     }
 }
