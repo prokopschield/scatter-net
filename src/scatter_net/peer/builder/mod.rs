@@ -6,10 +6,10 @@ use crate::{PeerGroup, ScatterNet};
 
 use super::PeerState;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct PeerBuilder {
-    net: Option<ScatterNet>,
-    node_id: Option<NodeId>,
+    net: ScatterNet,
+    node_id: NodeId,
     peer_group: Option<PeerGroup>,
     state: Option<PeerState>,
 }
