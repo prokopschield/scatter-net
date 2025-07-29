@@ -1,3 +1,3 @@
 mod new;
-mod peer_group;
-mod state;
+mod with_peer_group;
+mod with_state;
