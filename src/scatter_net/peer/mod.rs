@@ -1,8 +1,10 @@
+mod builder;
 mod implementations;
 mod inner;
 mod methods;
 mod state;
 
+pub use builder::*;
 pub use implementations::*;
 pub use inner::*;
 use ps_rwt::RWT;
