@@ -1,13 +1,13 @@
 use iroh::NodeId;
 use serde::{Deserialize, Serialize};
 
-use super::PeerUsage;
+use crate::PeerUsage;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PeerState {
     pub node_id: NodeId,
     #[serde(default)]
-    pub terminated: bool,
-    #[serde(default)]
     pub usage: PeerUsage,
+    #[serde(default)]
+    pub terminated: bool,
 }

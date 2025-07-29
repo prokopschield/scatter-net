@@ -1,9 +1,7 @@
 use anyhow::Result;
 use iroh::endpoint::Connection;
 
-use crate::{
-    legacy::peer::PeerState, Peer, PeerInnerReadonly, PeerInnerWritable, PeerUsage, ScatterNet,
-};
+use crate::{Peer, PeerInnerReadonly, PeerInnerWritable, PeerState, PeerUsage, ScatterNet};
 
 impl Peer {
     pub fn init(net: ScatterNet, connection: Connection, state: Option<PeerState>) -> Result<Self> {
