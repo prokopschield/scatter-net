@@ -1,13 +1,13 @@
-use iroh::NodeId;
+use iroh::NodeAddr;
 
 use crate::{PeerBuilder, ScatterNet};
 
 impl PeerBuilder {
     #[must_use]
-    pub const fn new(net: ScatterNet, node_id: NodeId) -> Self {
+    pub fn new(net: ScatterNet, node_addr: impl Into<NodeAddr>) -> Self {
         Self {
             net,
-            node_id,
+            node_addr: node_addr.into(),
             peer_group: None,
             state: None,
         }

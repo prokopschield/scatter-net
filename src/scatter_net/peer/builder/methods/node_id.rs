@@ -4,9 +4,7 @@ use crate::PeerBuilder;
 
 impl PeerBuilder {
     #[must_use]
-    pub const fn node_id(mut self, node_id: NodeId) -> Self {
-        self.node_id = node_id;
-
-        self
+    pub fn node_id(self, node_id: impl Into<NodeId>) -> Self {
+        self.node_addr(node_id.into())
     }
 }
