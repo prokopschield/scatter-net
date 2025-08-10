@@ -5,9 +5,9 @@ impl PeerBuilder {
     ///
     /// # Errors
     ///
-    /// - [`PeerBuilderConnectError::Connect`] means the Iroh connection failed.
-    /// - [`PeerBuilderConnectError::SelectPeerGroup`] means the peer couldn't be placed into a `PeerGroup`.
-    pub async fn connect(self) -> Result<Peer, PeerBuilderConnectError> {
+    /// - [`PeerBuilderFinalizeError::Connect`] means the Iroh connection failed.
+    /// - [`PeerBuilderFinalizeError::SelectPeerGroup`] means the peer couldn't be placed into a `PeerGroup`.
+    pub async fn finalize(self) -> Result<Peer, PeerBuilderFinalizeError> {
         let Self {
             connection,
             net,
@@ -46,7 +46,7 @@ impl PeerBuilder {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum PeerBuilderConnectError {
+pub enum PeerBuilderFinalizeError {
     #[error(transparent)]
     Connect(#[from] iroh::endpoint::ConnectError),
     #[error(transparent)]
