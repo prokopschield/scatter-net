@@ -9,6 +9,7 @@ impl PeerBuilder {
     /// - [`PeerBuilderConnectError::SelectPeerGroup`] means the peer couldn't be placed into a `PeerGroup`.
     pub async fn connect(self) -> Result<Peer, PeerBuilderConnectError> {
         let Self {
+            connection,
             net,
             node_addr,
             peer_group,
@@ -16,7 +17,11 @@ impl PeerBuilder {
         } = self;
 
         let node_id = node_addr.node_id;
-        let connection = net.endpoint.connect(node_addr, ALPN).await?;
+
+        let connection = match connection {
+            Some(connection) => connection,
+            None => net.endpoint.connect(node_addr, ALPN).await?,
+        };
 
         let peer = Peer::from_inner(
             PeerInnerReadonly { net, node_id },

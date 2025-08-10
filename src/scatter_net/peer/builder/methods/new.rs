@@ -6,6 +6,7 @@ impl PeerBuilder {
     #[must_use]
     pub fn new(net: ScatterNet, node_addr: impl Into<NodeAddr>) -> Self {
         Self {
+            connection: None,
             net,
             node_addr: node_addr.into(),
             peer_group: None,
