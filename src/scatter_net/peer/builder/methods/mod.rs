@@ -1,4 +1,4 @@
-mod connect;
+mod connect_to;
 mod finalize;
 mod new;
 mod with_direct_addresses;

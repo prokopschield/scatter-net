@@ -8,7 +8,10 @@ impl PeerBuilder {
     /// # Errors
     ///
     /// Returns a [`ConnectError`] if the connection fails.
-    pub async fn connect(mut self, node_addr: impl Into<NodeAddr>) -> Result<Self, ConnectError> {
+    pub async fn connect_to(
+        mut self,
+        node_addr: impl Into<NodeAddr>,
+    ) -> Result<Self, ConnectError> {
         let connection = self.net.endpoint.connect(node_addr, ALPN).await?;
 
         self.connection = Some(connection);
