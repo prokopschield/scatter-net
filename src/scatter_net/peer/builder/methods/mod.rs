@@ -1,3 +1,4 @@
+mod connect;
 mod connect_to;
 mod finalize;
 mod new;
