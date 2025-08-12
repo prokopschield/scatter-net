@@ -11,4 +11,3 @@ mod with_relay_url;
 mod with_state;
 
 pub use connect_to::PeerBuilderConnectToError;
-pub use finalize::PeerBuilderFinalizeError;

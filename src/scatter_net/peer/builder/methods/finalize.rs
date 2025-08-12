@@ -4,11 +4,8 @@ use crate::{Peer, PeerBuilder, PeerInnerReadonly, PeerInnerWritable, PeerState, 
 
 impl PeerBuilder {
     /// Finish the building process and connect to the Peer
-    ///
-    /// # Errors
-    ///
-    /// - [`PeerBuilderFinalizeError::SelectPeerGroup`] means the peer couldn't be placed into a `PeerGroup`.
-    pub fn finalize(self, connection: Connection) -> Result<Peer, PeerBuilderFinalizeError> {
+    #[must_use]
+    pub fn finalize(self, connection: Connection) -> Peer {
         let Self {
             direct_addresses: _,
             net,
@@ -36,12 +33,6 @@ impl PeerBuilder {
 
         peer.init();
 
-        Ok(peer)
+        peer
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum PeerBuilderFinalizeError {
-    #[error(transparent)]
-    SelectPeerGroup(#[from] crate::PeerSelectPeerGroupError),
 }

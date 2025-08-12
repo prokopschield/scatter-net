@@ -16,7 +16,7 @@ impl ScatterNet {
 
         let peer = Peer::builder(self.clone(), node_id)
             .with_option_state(state)
-            .finalize(connection)?;
+            .finalize(connection);
 
         guard.peers.insert(node_id, peer.clone());
 

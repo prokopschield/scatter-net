@@ -14,7 +14,7 @@ impl PeerBuilder {
         node_addr: impl Into<NodeAddr>,
     ) -> Result<Peer, PeerBuilderConnectToError> {
         let connection = self.net.endpoint.connect(node_addr, ALPN).await?;
-        let peer = self.finalize(connection)?;
+        let peer = self.finalize(connection);
 
         Ok(peer)
     }
@@ -24,6 +24,4 @@ impl PeerBuilder {
 pub enum PeerBuilderConnectToError {
     #[error(transparent)]
     Connect(#[from] iroh::endpoint::ConnectError),
-    #[error(transparent)]
-    Finalize(#[from] crate::PeerBuilderFinalizeError),
 }
