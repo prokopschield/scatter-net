@@ -1,7 +1,7 @@
 use crate::{spawn_and_forget, Peer};
 
 impl Peer {
-    pub fn init_new(&self) {
+    pub fn init(&self) {
         self.clone().listen();
 
         if !self

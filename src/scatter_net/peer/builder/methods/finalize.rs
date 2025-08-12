@@ -34,7 +34,7 @@ impl PeerBuilder {
             peer_group.insert_peer(peer.clone());
         }
 
-        peer.init_new();
+        peer.init();
 
         Ok(peer)
     }
