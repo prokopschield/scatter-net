@@ -3,6 +3,7 @@ mod inner;
 mod methods;
 
 pub use inner::*;
+pub use methods::*;
 use ps_rwt::RWT;
 
 #[derive(Clone)]
