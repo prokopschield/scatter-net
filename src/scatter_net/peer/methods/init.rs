@@ -2,7 +2,7 @@ use crate::{spawn_and_forget, Peer};
 
 impl Peer {
     pub fn init(&self) {
-        self.clone().listen();
+        self.clone().listen(self.read().connection.clone());
 
         if !self
             .net
