@@ -2,8 +2,6 @@ mod methods;
 
 use std::{collections::BTreeSet, net::SocketAddr};
 
-pub use methods::*;
-
 use crate::{PeerGroup, ScatterNet};
 
 use super::PeerState;
