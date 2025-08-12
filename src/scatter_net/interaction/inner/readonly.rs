@@ -7,5 +7,5 @@ use crate::Peer;
 pub struct InteractionInnerReadonly {
     pub peer: Peer,
     pub recv_stream: Mutex<RecvStream>,
-    pub send_stream: Option<Mutex<SendStream>>,
+    pub send_stream: Mutex<SendStream>,
 }

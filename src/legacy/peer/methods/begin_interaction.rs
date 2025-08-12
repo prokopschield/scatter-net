@@ -6,7 +6,7 @@ impl Peer {
     pub async fn begin_interaction(self) -> Result<Interaction, PeerBeginInteractionError> {
         let connection = self.read().connection.clone();
         let channel = connection.open_bi().await?;
-        let interaction = Interaction::init(self, channel.1, Some(channel.0));
+        let interaction = Interaction::init(self, channel.1, channel.0);
 
         Ok(interaction)
     }

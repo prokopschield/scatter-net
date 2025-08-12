@@ -7,7 +7,7 @@ impl Peer {
         spawn_and_forget::<_, ()>(async move {
             loop {
                 let channel = connection.accept_bi().await?;
-                let interaction = Interaction::init(self.clone(), channel.1, Some(channel.0));
+                let interaction = Interaction::init(self.clone(), channel.1, channel.0);
 
                 spawn_and_forget(async move { Ok(interaction.process().await?) });
             }
