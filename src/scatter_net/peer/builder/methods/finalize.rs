@@ -30,13 +30,11 @@ impl PeerBuilder {
             },
         );
 
-        peer.clone().listen();
-
         if let Some(peer_group) = peer_group {
             peer_group.insert_peer(peer.clone());
-        } else {
-            peer.clone().select_peer_group().await?;
         }
+
+        peer.init_new();
 
         Ok(peer)
     }
