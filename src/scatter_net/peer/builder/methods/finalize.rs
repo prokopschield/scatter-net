@@ -1,27 +1,22 @@
-use crate::{Peer, PeerBuilder, PeerInnerReadonly, PeerInnerWritable, PeerState, PeerUsage, ALPN};
+use iroh::endpoint::Connection;
+
+use crate::{Peer, PeerBuilder, PeerInnerReadonly, PeerInnerWritable, PeerState, PeerUsage};
 
 impl PeerBuilder {
     /// Finish the building process and connect to the Peer
     ///
     /// # Errors
     ///
-    /// - [`PeerBuilderFinalizeError::Connect`] means the Iroh connection failed.
     /// - [`PeerBuilderFinalizeError::SelectPeerGroup`] means the peer couldn't be placed into a `PeerGroup`.
-    pub async fn finalize(self) -> Result<Peer, PeerBuilderFinalizeError> {
+    pub async fn finalize(self, connection: Connection) -> Result<Peer, PeerBuilderFinalizeError> {
         let Self {
-            connection,
+            direct_addresses: _,
             net,
-            node_addr,
+            node_id,
+            relay_url: _,
             peer_group,
             state,
         } = self;
-
-        let node_id = node_addr.node_id;
-
-        let connection = match connection {
-            Some(connection) => connection,
-            None => net.endpoint.connect(node_addr, ALPN).await?,
-        };
 
         let peer = Peer::from_inner(
             PeerInnerReadonly { net, node_id },
@@ -47,8 +42,6 @@ impl PeerBuilder {
 
 #[derive(thiserror::Error, Debug)]
 pub enum PeerBuilderFinalizeError {
-    #[error(transparent)]
-    Connect(#[from] iroh::endpoint::ConnectError),
     #[error(transparent)]
     SelectPeerGroup(#[from] crate::PeerSelectPeerGroupError),
 }

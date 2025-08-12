@@ -1,5 +1,7 @@
 mod methods;
 
+use std::{collections::BTreeSet, net::SocketAddr};
+
 pub use methods::*;
 
 use crate::{PeerGroup, ScatterNet};
@@ -8,9 +10,10 @@ use super::PeerState;
 
 #[derive(Clone, Debug)]
 pub struct PeerBuilder {
-    connection: Option<iroh::endpoint::Connection>,
+    direct_addresses: BTreeSet<SocketAddr>,
     net: ScatterNet,
-    node_addr: iroh::NodeAddr,
+    node_id: iroh::NodeId,
+    relay_url: Option<iroh::RelayUrl>,
     peer_group: Option<PeerGroup>,
     state: Option<PeerState>,
 }

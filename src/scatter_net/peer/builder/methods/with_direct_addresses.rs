@@ -8,7 +8,7 @@ impl PeerBuilder {
         mut self,
         addresses: impl IntoIterator<Item = SocketAddr>,
     ) -> Self {
-        self.node_addr = self.node_addr.with_direct_addresses(addresses);
+        self.direct_addresses = addresses.into_iter().collect();
 
         self
     }

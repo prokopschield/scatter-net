@@ -1,19 +1,21 @@
-use std::mem::replace;
-
-use iroh::endpoint::ConnectError;
+use iroh::NodeAddr;
 use n0_future::Future;
 
-use crate::PeerBuilder;
+use crate::{Peer, PeerBuilder, PeerBuilderConnectToError};
 
 impl PeerBuilder {
-    /// Initializes a connection
+    /// Initializes a connection, consuming the builder.
     ///
     /// # Errors
     ///
-    /// Returns a [`ConnectError`] if the connection fails.
-    pub fn connect(mut self) -> impl Future<Output = Result<Self, ConnectError>> {
-        let node_id = self.node_addr.node_id;
-        let node_addr = replace(&mut self.node_addr, node_id.into());
+    /// - [`PeerBuilderConnectToError::Connect`] means the [`iroh`] connection failed.
+    /// - [`PeerBuilderConnectToError::Finalize`] means the [`Peer`] initialization failed.
+    pub fn connect(self) -> impl Future<Output = Result<Peer, PeerBuilderConnectToError>> {
+        let node_addr = NodeAddr {
+            direct_addresses: self.direct_addresses.iter().copied().collect(),
+            node_id: self.node_id,
+            relay_url: self.relay_url.clone(),
+        };
 
         self.connect_to(node_addr)
     }

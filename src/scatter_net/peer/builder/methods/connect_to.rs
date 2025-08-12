@@ -1,21 +1,29 @@
-use iroh::{endpoint::ConnectError, NodeAddr};
+use iroh::NodeAddr;
 
-use crate::{PeerBuilder, ALPN};
+use crate::{Peer, PeerBuilder, ALPN};
 
 impl PeerBuilder {
     /// Initializes a connection to `node_addr`, consuming the builder.
     ///
     /// # Errors
     ///
-    /// Returns a [`ConnectError`] if the connection fails.
+    /// - [`PeerBuilderConnectToError::Connect`] means the [`iroh`] connection failed.
+    /// - [`PeerBuilderConnectToError::Finalize`] means the [`Peer`] initialization failed.
     pub async fn connect_to(
-        mut self,
+        self,
         node_addr: impl Into<NodeAddr>,
-    ) -> Result<Self, ConnectError> {
+    ) -> Result<Peer, PeerBuilderConnectToError> {
         let connection = self.net.endpoint.connect(node_addr, ALPN).await?;
+        let peer = self.finalize(connection).await?;
 
-        self.connection = Some(connection);
-
-        Ok(self)
+        Ok(peer)
     }
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum PeerBuilderConnectToError {
+    #[error(transparent)]
+    Connect(#[from] iroh::endpoint::ConnectError),
+    #[error(transparent)]
+    Finalize(#[from] crate::PeerBuilderFinalizeError),
 }
