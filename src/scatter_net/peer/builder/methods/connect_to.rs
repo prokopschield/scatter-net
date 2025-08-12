@@ -14,7 +14,7 @@ impl PeerBuilder {
         node_addr: impl Into<NodeAddr>,
     ) -> Result<Peer, PeerBuilderConnectToError> {
         let connection = self.net.endpoint.connect(node_addr, ALPN).await?;
-        let peer = self.finalize(connection).await?;
+        let peer = self.finalize(connection)?;
 
         Ok(peer)
     }

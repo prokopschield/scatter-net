@@ -8,7 +8,7 @@ impl PeerBuilder {
     /// # Errors
     ///
     /// - [`PeerBuilderFinalizeError::SelectPeerGroup`] means the peer couldn't be placed into a `PeerGroup`.
-    pub async fn finalize(self, connection: Connection) -> Result<Peer, PeerBuilderFinalizeError> {
+    pub fn finalize(self, connection: Connection) -> Result<Peer, PeerBuilderFinalizeError> {
         let Self {
             direct_addresses: _,
             net,
