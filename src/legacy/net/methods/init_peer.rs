@@ -9,7 +9,7 @@ impl ScatterNet {
         let mut guard = self.write();
 
         if let Some(peer) = guard.peers.get(&node_id) {
-            peer.replace_connection(connection)?;
+            peer.replace_connection(connection);
 
             return Ok(peer.clone());
         }

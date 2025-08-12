@@ -10,7 +10,6 @@ mod net;
 mod node_id;
 mod ping;
 mod put_blob;
-mod replace_connection;
 mod select_peer_group;
 mod send_datagram;
 
