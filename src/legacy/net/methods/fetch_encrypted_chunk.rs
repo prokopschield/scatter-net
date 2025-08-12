@@ -22,7 +22,7 @@ use crate::{FetchResponse, Peer, PeerGroup, ScatterNet};
 
 impl ScatterNet {
     #[must_use]
-    pub fn fetch_encrypted_chunk(&self, hash: Arc<Hash>) -> ScatterNetFetchEncryptedChunk {
+    pub fn fetch_encrypted_chunk(&self, hash: Arc<Hash>) -> ScatterNetFetchEncryptedChunk<'_> {
         ScatterNetFetchEncryptedChunk::init(self, hash)
     }
 }

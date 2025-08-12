@@ -4,7 +4,7 @@ use crate::ScatterNet;
 
 impl ScatterNet {
     #[must_use]
-    pub fn get_lake(&self) -> &DataLake {
+    pub fn get_lake(&self) -> &DataLake<'_> {
         &self.lake
     }
 }
