@@ -1,8 +1,6 @@
-mod accept_connection;
 mod begin_interaction;
 mod fetch_blob;
 mod get_state;
-mod init;
 mod is_available;
 mod listen;
 mod listen_bi;
