@@ -30,6 +30,8 @@ impl PeerBuilder {
             },
         );
 
+        peer.clone().listen();
+
         if let Some(peer_group) = peer_group {
             peer_group.insert_peer(peer.clone());
         } else {
