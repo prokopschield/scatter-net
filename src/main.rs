@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
     truncate(&filename).await?;
 
     let lake_config = DataLakeConfig {
-        store: vec![ConfigStoreEntry {
+        stores: vec![ConfigStoreEntry {
             filename,
             readonly: false,
         }],

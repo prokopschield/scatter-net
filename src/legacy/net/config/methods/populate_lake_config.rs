@@ -13,7 +13,7 @@ use crate::NetConfig;
 impl NetConfig {
     pub fn populate_lake_config(&mut self) -> Result<()> {
         // Check if there's already a writable store
-        let has_writable = self.lake_config.store.iter().any(|entry| !entry.readonly);
+        let has_writable = self.lake_config.stores.iter().any(|entry| !entry.readonly);
 
         if !has_writable {
             // Create default writable store in user's home directory
@@ -47,7 +47,7 @@ impl NetConfig {
                 }
 
                 // Add the new store to the configuration
-                self.lake_config.store.push(ConfigStoreEntry {
+                self.lake_config.stores.push(ConfigStoreEntry {
                     filename: lake_path.to_string_lossy().into_owned(),
                     readonly: false,
                 });
@@ -57,7 +57,7 @@ impl NetConfig {
                     for entry in entries.flatten() {
                         let path = entry.path();
                         if path != lake_path && path.extension().is_some_and(|ext| ext == "lake") {
-                            self.lake_config.store.push(ConfigStoreEntry {
+                            self.lake_config.stores.push(ConfigStoreEntry {
                                 filename: path.to_string_lossy().into_owned(),
                                 readonly: true,
                             });
