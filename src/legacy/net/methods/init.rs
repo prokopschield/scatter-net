@@ -30,7 +30,7 @@ impl ScatterNet {
 
         eprintln!("Initialized node {node_id}");
 
-        let lake = DataLake::init(config.lake_config.clone())?;
+        let lake = DataLake::init(config.lake.clone())?;
 
         let readonly = ScatterNetInnerReadonly {
             config,
