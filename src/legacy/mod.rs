@@ -15,7 +15,6 @@ pub use interaction::*;
 pub use net::*;
 pub use packet::*;
 pub use peer::*;
-pub use peer_group::PeerGroupConfig;
 pub use protocol::ScatterNetProtocol;
 pub use terminate::*;
 pub use utils::*;
