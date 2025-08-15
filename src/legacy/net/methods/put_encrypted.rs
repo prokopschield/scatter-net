@@ -205,8 +205,8 @@ pub enum ScatterNetPutEncryptedError {
 
 #[derive(thiserror::Error, Debug)]
 enum PutResponseInternalError {
-    #[error("This Promise was consumed already")]
-    ConsumedAlready,
+    #[error("This Promise was consumed more than once.")]
+    AlreadyConsumed,
     #[error("Failed")]
     Failure,
     #[error("LimitExceeded")]
@@ -217,6 +217,6 @@ enum PutResponseInternalError {
 
 impl PromiseRejection for PutResponseInternalError {
     fn already_consumed() -> Self {
-        Self::ConsumedAlready
+        Self::AlreadyConsumed
     }
 }

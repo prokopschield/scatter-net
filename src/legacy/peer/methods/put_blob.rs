@@ -189,10 +189,10 @@ impl Future for PeerPutBlob {
 
 #[derive(thiserror::Error, Debug)]
 pub enum PeerPutBlobError {
+    #[error("This Promise was consumed more than once.")]
+    AlreadyConsumed,
     #[error(transparent)]
     BeginInteraction(#[from] crate::PeerBeginInteractionError),
-    #[error("This Promise was consumed more than once.")]
-    ConsumedAlready,
     #[error("Peer did not respond to the put request.")]
     DidNotRespond,
     #[error("Peer did not provide a valid response.")]
@@ -209,7 +209,7 @@ pub enum PeerPutBlobError {
 
 impl PromiseRejection for PeerPutBlobError {
     fn already_consumed() -> Self {
-        Self::ConsumedAlready
+        Self::AlreadyConsumed
     }
 }
 

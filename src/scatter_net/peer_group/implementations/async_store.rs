@@ -70,7 +70,7 @@ pub enum PeerGroupAsyncStoreError {
     #[error("All Peer calls failed: {0:?}")]
     AllFailed(Vec<crate::PeerAsyncStoreError>),
     #[error("This Promise was consumed more than once.")]
-    ConsumedAlready,
+    AlreadyConsumed,
     #[error("DataChunk error: {0}")]
     DataChunk(#[from] PsDataChunkError),
     #[error("Hkey error: {0}")]
@@ -81,6 +81,6 @@ pub enum PeerGroupAsyncStoreError {
 
 impl PromiseRejection for PeerGroupAsyncStoreError {
     fn already_consumed() -> Self {
-        Self::ConsumedAlready
+        Self::AlreadyConsumed
     }
 }
