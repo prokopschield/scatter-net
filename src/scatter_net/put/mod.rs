@@ -1,6 +1,7 @@
 mod error;
 mod implementations;
 mod inner;
+mod methods;
 
 pub use error::PutError;
 pub use inner::*;
