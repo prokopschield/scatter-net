@@ -8,7 +8,7 @@ use ps_datachunk::DataChunk;
 use ps_hkey::{AsyncStore, Hkey};
 use ps_promise::Promise;
 
-use crate::{PeerGroup, Put, PutError, PutInnerWritable};
+use crate::{Put, PutError, PutInnerWritable};
 
 impl Future for Put {
     type Output = Result<Hkey, PutError>;
@@ -30,16 +30,14 @@ impl Future for Put {
             // last time we need `net`
             let peer_groups = net.get_peer_groups();
 
-            let pending: Vec<(PeerGroup, Promise<Hkey, crate::PeerGroupAsyncStoreError>)> =
-                peer_groups
-                    .into_iter()
-                    .map(|peer_group| {
-                        let chunk = chunk.clone();
-                        let group = peer_group.clone();
+            let pending: Vec<Promise<Hkey, crate::PeerGroupAsyncStoreError>> = peer_groups
+                .into_iter()
+                .map(|peer_group| {
+                    let chunk = chunk.clone();
 
-                        (group, { Promise::new(peer_group.put(chunk.into_bytes())) })
-                    })
-                    .collect();
+                    Promise::new(peer_group.put(chunk.into_bytes()))
+                })
+                .collect();
 
             *guard = PutInnerWritable::Processing { hkey, pending };
         }
@@ -50,10 +48,10 @@ impl Future for Put {
 
         let mut resolved = Vec::new();
 
-        for (peer_group, mut promise) in std::mem::take(pending) {
+        for mut promise in std::mem::take(pending) {
             match promise.poll(cx) {
-                Pending => pending.push((peer_group, promise)),
-                Ready(result) => resolved.push((peer_group, result)),
+                Pending => pending.push(promise),
+                Ready(result) => resolved.push(result),
             }
         }
 
@@ -61,7 +59,7 @@ impl Future for Put {
 
         let is_pending = !pending.is_empty();
 
-        for (peer_group, result) in resolved {
+        for result in resolved {
             match result {
                 Ok(value) => {
                     if hkey.is_none() {
@@ -72,7 +70,7 @@ impl Future for Put {
                     if !is_pending && error.is_none() {
                         error.replace(err);
                     } else {
-                        pending.push((peer_group, Promise::reject(err)));
+                        pending.push(Promise::reject(err));
                     }
                 }
             }
