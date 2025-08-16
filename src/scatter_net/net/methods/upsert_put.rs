@@ -3,7 +3,7 @@ use ps_datachunk::OwnedDataChunk;
 use crate::{Put, ScatterNet};
 
 impl ScatterNet {
-    fn upsert_put(&self, chunk: OwnedDataChunk) -> Put {
+    pub(crate) fn upsert_put(&self, chunk: OwnedDataChunk) -> Put {
         let mut guard = self.write();
         let hash = chunk.hash();
 
