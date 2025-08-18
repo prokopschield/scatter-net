@@ -58,6 +58,9 @@ impl Future for Fetch {
                 Ready(Ok(chunk)) => {
                     net.upsert_put(chunk.clone());
 
+                    // drop cached reference
+                    net.write().fetches.remove(&self.hash);
+
                     *guard = FetchInnerWritable::Done {
                         chunk: chunk.clone(),
                     };
