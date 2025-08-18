@@ -4,6 +4,7 @@ mod inner;
 mod methods;
 
 pub use config::*;
+pub use implementations::*;
 pub use inner::*;
 pub use methods::*;
 use ps_rwt::RWT;

@@ -15,7 +15,7 @@ use ps_hash::Hash;
 use ps_hkey::{Hkey, LongHkeyExpanded};
 use ps_promise::{Promise, PromiseRejection};
 
-use crate::{AsyncStoreError, Peer, PeerGroup, PeerPutBlobError, PutResponse, ScatterNet};
+use crate::{Peer, PeerGroup, PeerPutBlobError, PutResponse, ScatterNet};
 
 use super::{ScatterNetPutEncrypted, ScatterNetPutRaw};
 
@@ -344,7 +344,7 @@ impl Future for ScatterNetPutBlob {
 #[derive(thiserror::Error, Debug)]
 pub enum ScatterNetPutBlobError {
     #[error(transparent)]
-    AsyncStore(Box<AsyncStoreError>),
+    AsyncStore(#[from] crate::ScatterNetAsyncStoreError),
     #[error(transparent)]
     Buffer(#[from] ps_buffer::BufferError),
     #[error(transparent)]
@@ -362,12 +362,6 @@ pub enum ScatterNetPutBlobError {
 }
 
 type Result<T = ScatterNetPutBlob, E = ScatterNetPutBlobError> = std::result::Result<T, E>;
-
-impl From<AsyncStoreError> for ScatterNetPutBlobError {
-    fn from(value: AsyncStoreError) -> Self {
-        Self::AsyncStore(Box::new(value))
-    }
-}
 
 impl PromiseRejection for ScatterNetPutBlobError {
     fn already_consumed() -> Self {
