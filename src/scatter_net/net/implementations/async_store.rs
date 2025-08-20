@@ -20,9 +20,9 @@ impl AsyncStore for ScatterNet {
         &self,
         chunk: C,
     ) -> ps_promise::Promise<(), Self::Error> {
-        let put = self.upsert_put(chunk.into_owned());
+        self.upsert_put(chunk.into_owned());
 
-        Promise::new(async move { Ok(put.await.map(|_| ())?) })
+        Promise::resolve(())
     }
 }
 

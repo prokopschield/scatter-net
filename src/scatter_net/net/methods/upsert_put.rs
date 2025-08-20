@@ -1,4 +1,5 @@
 use ps_datachunk::OwnedDataChunk;
+use tokio::spawn;
 
 use crate::{Put, ScatterNet};
 
@@ -22,6 +23,9 @@ impl ScatterNet {
         guard.puts.insert(hash, put.clone());
 
         drop(guard);
+
+        // propagate this Put asynchronously
+        spawn(put.clone());
 
         put
     }
