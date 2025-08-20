@@ -29,12 +29,12 @@ impl Packet {
                 },
             )),
             Self::FetchResponse(response) => response.process(peer).await,
-            Self::PutRequest(request) => Ok(Some(
-                (peer.net().put_blob(request.data)?.early_return().await).map_or_else(
+            Self::PutRequest(request) => {
+                Ok(Some((peer.net().put_blob(request.data).await).map_or_else(
                     |_| Self::PutResponse(crate::PutResponse::Failure),
                     |hkey| Self::PutResponse(crate::PutResponse::Success(hkey.to_string())),
-                ),
-            )),
+                )))
+            }
             Self::PutResponse(response) => {
                 eprintln!("Received unsolicited PutResponse({response:?}) from {peer}");
                 Ok(Some(Self::Error("Unsolicited PutResponse.".to_string())))
@@ -48,7 +48,7 @@ pub enum PacketProcessError {
     #[error(transparent)]
     HashValidation(#[from] ps_hash::HashValidationError),
     #[error(transparent)]
-    Put(#[from] crate::ScatterNetPutBlobError),
+    Put(#[from] crate::ScatterNetAsyncStoreError),
     #[error("The Peer sent an Error packet.")]
     ReceivedErrorPacket(String),
     #[error(transparent)]

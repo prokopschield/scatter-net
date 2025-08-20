@@ -18,7 +18,7 @@ impl FetchResponse {
                 );
             }
             Self::Success(blob) => {
-                let hkey = ScatterNet::put_blob(peer.net(), blob)?.await?;
+                let hkey = ScatterNet::put_blob(peer.net(), blob).await?;
 
                 let hkey = hkey.to_string();
 
