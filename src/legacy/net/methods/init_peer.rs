@@ -7,7 +7,7 @@ impl ScatterNet {
     pub fn init_peer(&self, connection: Connection, state: Option<PeerState>) -> Result<Peer> {
         let node_id = connection.remote_node_id()?;
 
-        if let Some(peer) = self.read().peers.get(&node_id) {
+        if let Some(peer) = self.get_peer(&node_id) {
             peer.replace_connection(connection);
 
             return Ok(peer.clone());

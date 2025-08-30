@@ -12,7 +12,7 @@ impl ScatterNet {
         connection: Connection,
     ) -> Result<Peer, ScatterNetAcceptConnectionError> {
         let node_id = connection.remote_node_id()?;
-        let peer = self.read().peers.get(&node_id).cloned();
+        let peer = self.get_peer(&node_id);
 
         if let Some(peer) = peer {
             peer.replace_connection(connection);
