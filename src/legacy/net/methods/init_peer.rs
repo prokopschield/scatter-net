@@ -10,7 +10,7 @@ impl ScatterNet {
         if let Some(peer) = self.get_peer(&node_id) {
             peer.replace_connection(connection);
 
-            return Ok(peer.clone());
+            return Ok(peer);
         }
 
         let peer = Peer::builder(self.clone(), node_id)
