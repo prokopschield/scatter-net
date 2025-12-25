@@ -6,12 +6,12 @@ impl ScatterNet {
     /// Accepts the [`Connection`] and returns the [`Peer`].
     ///
     /// # Errors
-    /// - [`ScatterNetAcceptConnectionError::RemoteNodeId`] means the [`Connection`]'s `NodeId` couldn't be resolved.
+    /// - [`ScatterNetAcceptConnectionError::RemoteEndpointId`] means the [`Connection`]'s `EndpointId` couldn't be resolved.
     pub fn accept_connection(
         &self,
         connection: Connection,
     ) -> Result<Peer, ScatterNetAcceptConnectionError> {
-        let node_id = connection.remote_node_id()?;
+        let node_id = connection.remote_id();
         let peer = self.get_peer(&node_id);
 
         if let Some(peer) = peer {
@@ -29,5 +29,5 @@ impl ScatterNet {
 #[derive(thiserror::Error, Debug)]
 pub enum ScatterNetAcceptConnectionError {
     #[error(transparent)]
-    RemoteNodeId(#[from] iroh::endpoint::RemoteNodeIdError),
+    RemoteEndpointId(#[from] iroh::endpoint::RemoteEndpointIdError),
 }

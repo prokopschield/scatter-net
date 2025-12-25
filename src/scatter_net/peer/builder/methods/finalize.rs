@@ -10,7 +10,6 @@ impl PeerBuilder {
             direct_addresses: _,
             net,
             node_id,
-            relay_url: _,
             peer_group,
             state,
         } = self;

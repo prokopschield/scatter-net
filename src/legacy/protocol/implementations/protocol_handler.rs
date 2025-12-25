@@ -1,4 +1,5 @@
 use iroh::protocol::{AcceptError, ProtocolHandler};
+use n0_error::Meta;
 
 use crate::{ScatterNet, ScatterNetProtocol, Terminate};
 
@@ -9,7 +10,8 @@ impl ProtocolHandler for ScatterNetProtocol {
         match result {
             Ok(_) => Ok(()),
             Err(err) => Err(AcceptError::User {
-                source: err.into_boxed_dyn_error(),
+                meta: Meta::new(),
+                source: err.into_boxed_dyn_error().into(),
             }),
         }
     }

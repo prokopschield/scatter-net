@@ -1,22 +1,17 @@
-use iroh::NodeAddr;
+use iroh::EndpointAddr;
 
 use crate::{PeerBuilder, ScatterNet};
 
 impl PeerBuilder {
     #[must_use]
-    pub fn new(net: ScatterNet, node_addr: impl Into<NodeAddr>) -> Self {
-        let NodeAddr {
-            node_id,
-            relay_url,
-            direct_addresses,
-        } = node_addr.into();
+    pub fn new(net: ScatterNet, node_addr: impl Into<EndpointAddr>) -> Self {
+        let EndpointAddr { id, addrs } = node_addr.into();
 
         Self {
-            direct_addresses,
+            direct_addresses: addrs,
             net,
-            node_id,
+            node_id: id,
             peer_group: None,
-            relay_url,
             state: None,
         }
     }

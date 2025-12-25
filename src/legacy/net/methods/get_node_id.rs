@@ -1,10 +1,10 @@
-use iroh::NodeId;
+use iroh::EndpointId;
 
 use crate::ScatterNet;
 
 impl ScatterNet {
     #[must_use]
-    pub fn get_node_id(&self) -> NodeId {
-        self.endpoint.node_id()
+    pub fn get_node_id(&self) -> EndpointId {
+        self.endpoint.id()
     }
 }

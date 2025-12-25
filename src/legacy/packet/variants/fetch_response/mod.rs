@@ -1,7 +1,7 @@
 mod methods;
 
 use bytes::Bytes;
-use iroh::NodeId;
+use iroh::EndpointId;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -16,5 +16,5 @@ pub enum FetchResponse {
     Success(Bytes),
 
     /// Suggests a node to talk to.
-    Suggest(NodeId),
+    Suggest(EndpointId),
 }

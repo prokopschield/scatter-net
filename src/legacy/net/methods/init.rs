@@ -13,18 +13,14 @@ impl ScatterNet {
     /// # Errors
     /// An Error is returned if binding the socket fails.
     pub async fn init(config: NetConfig, state: NetState) -> Result<Self> {
-        let mut builder = Endpoint::builder()
-            .alpns(vec![ALPN.to_vec()])
-            .discovery_dht()
-            .discovery_local_network()
-            .discovery_n0();
+        let mut builder = Endpoint::builder().alpns(vec![ALPN.to_vec()]);
 
         if let Some(secret_key) = config.secret_key.clone() {
             builder = builder.secret_key(secret_key);
         }
 
         let endpoint = builder.bind().await?;
-        let node_id = endpoint.node_id();
+        let node_id = endpoint.id();
 
         let peers_state = state.peers.clone();
 
