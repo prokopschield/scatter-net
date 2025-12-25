@@ -17,7 +17,7 @@ impl AsyncStore for PeerGroup {
 
         Promise::new(async move {
             let peers = this.sort_peers(|lhs, rhs| {
-                distance(lhs.node_id, &**hash).cmp(&distance(rhs.node_id, &**hash))
+                distance(lhs.node_id, hash.digest()).cmp(&distance(rhs.node_id, hash.digest()))
             });
 
             if peers.is_empty() {
@@ -44,7 +44,7 @@ impl AsyncStore for PeerGroup {
 
         Promise::new(async move {
             let peers = this.sort_peers(|lhs, rhs| {
-                distance(lhs.node_id, &**hash).cmp(&distance(rhs.node_id, &**hash))
+                distance(lhs.node_id, hash.digest()).cmp(&distance(rhs.node_id, hash.digest()))
             });
 
             if peers.is_empty() {

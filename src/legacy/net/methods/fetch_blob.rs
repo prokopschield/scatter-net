@@ -1,15 +1,12 @@
-use ps_buffer::{BufferError, SharedBuffer, ToSharedBuffer};
+use bytes::Bytes;
+use ps_buffer::BufferError;
 use ps_hkey::Hkey;
 
 use crate::ScatterNet;
 
 impl ScatterNet {
-    pub async fn fetch_blob(self, hkey: &Hkey) -> Result<SharedBuffer, ScatterNetFetchBlobError> {
-        let buffer = hkey
-            .resolve_async(&self)
-            .await?
-            .data_ref()
-            .to_shared_buffer()?;
+    pub async fn fetch_blob(self, hkey: &Hkey) -> Result<Bytes, ScatterNetFetchBlobError> {
+        let buffer = hkey.resolve_async(&self).await?;
 
         Ok(buffer)
     }

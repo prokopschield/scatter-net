@@ -6,34 +6,34 @@ description = "Secure data sharing library for peer-to-peer systems"
 license = "GPL-3.0-or-later"
 
 [dependencies]
-anyhow = { version = "1.0.99", features = ["backtrace"] }
-bitcode = { version = "0.6.7", features = ["serde"] }
-bytes = { version = "1.10.1", features = ["serde"] }
-chrono = "0.4.41"
+anyhow = { version = "1.0.100", features = ["backtrace"] }
+bitcode = { version = "0.6.9", features = ["serde"] }
+bytes = { version = "1.11.0", features = ["serde"] }
+chrono = "0.4.42"
 iroh = { version = "0.95.1", features = [
   "discovery-local-network",
   "discovery-pkarr-dht",
 ] }
 n0-error = "0.1.2"
-n0-future = "0.2.0"
-parking_lot = { version = "0.12.4", features = ["arc_lock"] }
-ps-buffer = "0.1.0-20"
-ps-cypher = "0.1.0-22"
-ps-datachunk = "0.1.0-30"
-ps-datalake = "0.1.0-13"
-ps-deflate = "0.1.0-15"
-ps-hash = "0.1.0-18"
-ps-hkey = "0.1.0-26"
-ps-promise = "0.1.0-10"
-ps-range = "0.1.0-2"
-ps-rwt = "0.1.0-1"
-ps-str = "0.1.0-2"
+n0-future = "0.3.1"
+parking_lot = { version = "0.12.5", features = ["arc_lock"] }
+ps-buffer = "0.1.0-21"
+ps-cypher = "0.1.0-26"
+ps-datachunk = "0.1.0-34"
+ps-datalake = "0.1.0-14"
+ps-deflate = "0.1.0-16"
+ps-hash = "0.1.0-24"
+ps-hkey = "0.1.0-32"
+ps-promise = "0.1.0-14"
+ps-range = "0.1.0-3"
+ps-rwt = "0.1.0-2"
+ps-str = "0.1.0-3"
 rand = "0.9.2"
-serde = { version = "1.0.219", features = ["serde_derive"] }
-serde_json = "1.0.143"
-thiserror = "2.0.16"
-tokio = "1.47.1"
-toml = "0.9.5"
+serde = { version = "1.0.228", features = ["serde_derive"] }
+serde_json = "1.0.147"
+thiserror = "2.0.17"
+tokio = "1.48.0"
+toml = "0.9.10"
 
 [profile.dev]
 opt-level = 3

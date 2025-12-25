@@ -74,7 +74,7 @@ impl AsyncStore for Interaction {
                         Err(InteractionAsyncStoreError::LimitExceeded)
                     }
                     crate::PutResponse::Success(hkey) => {
-                        if hkey.as_bytes() == hash.as_bytes() {
+                        if hkey == hash.to_string() {
                             Ok(())
                         } else {
                             Err(InteractionAsyncStoreError::HkeyMismatch {

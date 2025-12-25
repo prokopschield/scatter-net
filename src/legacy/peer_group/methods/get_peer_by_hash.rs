@@ -13,7 +13,7 @@ impl PeerGroup {
                 return;
             }
 
-            let iter_distance = distance(hash, node_id);
+            let iter_distance = distance(hash.digest(), node_id);
 
             if iter_distance < sel_distance {
                 sel_distance = iter_distance;
